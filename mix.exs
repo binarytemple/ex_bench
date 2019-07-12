@@ -12,10 +12,10 @@ defmodule PocEventTimer.MixProject do
   end
 
   # Run "mix help compile.app" to learn about applications.
+  # dont start the application automatically : mod: {PocEventTimer.Application, []}
   def application do
     [
-      extra_applications: [:logger],
-      mod: {PocEventTimer.Application, []}
+      extra_applications: [:logger]
     ]
   end
 
@@ -23,6 +23,7 @@ defmodule PocEventTimer.MixProject do
   defp deps do
     [
       {:poolboy, "~> 1.5"},
+      {:gen_stage, "~> 0.14"}
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end

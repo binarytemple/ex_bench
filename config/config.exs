@@ -11,8 +11,10 @@ use Mix.Config
 # You can configure your application as:
 #
 config :poc_event_timer,
-workers: 5,
-overflow: 2
+  workers: 5,
+  overflow: 2,
+  fun_to_call: fn x -> IO.inspect(x) end
+
 #
 # and access this configuration in your application as:
 #

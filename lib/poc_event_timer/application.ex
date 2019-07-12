@@ -34,28 +34,53 @@ end
 
 defmodule PocEventTimer.Signaler do
   use GenServer
+  require Logger
   @timeout 60000
+  @delay 1000
+
   def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, [])
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
+  @impl true
   def init(_) do
+    IO.puts("starting #{__MODULE__}")
+    Process.send_after(self(), { :work, :erlang.system_time()}, @delay)
     {:ok, nil}
   end
 
-  def handle_cast(:next, state) do
-    IO.puts("time : #{:erlang.system_time()}")
+  @impl true
+  def handle_info({:work,invoked}, state) do
+    # Do the desired work here
+    # Reschedule once more
+    drift = ((:erlang.system_time() - invoked)  - @delay * 1_000_000) / 1_000_000
+    rounded = :erlang.round(1000875000 / 1000_000)
+    corrected =  @delay  - :erlang.round(drift)
+
+    Process.send_after(self(), { :work, :erlang.system_time()}, corrected)
+    Logger.debug("drift :  #{drift},  corrected: #{corrected} ")
     Task.async(fn ->
       :poolboy.transaction(
         :worker,
-        fn pid -> GenServer.call(pid, {:square_root, 8}) end,
+        fn pid -> GenServer.cast(pid, :do_work) end,
         @timeout
       )
     end
     )
     {:noreply, state}
   end
+
+  @impl true
+  def handle_info(x, state) do
+    IO.puts("handle_info: #{inspect(x)}")
+    {:noreply, state}
+  end
+
+
+
 end
+
+
 
 
 defmodule PoolboyApp.Worker do
@@ -69,9 +94,8 @@ defmodule PoolboyApp.Worker do
     {:ok, nil}
   end
 
-  def handle_call({:square_root, x}, _from, state) do
-    IO.puts("process #{inspect(self())} calculating square root of #{x}")
-    :timer.sleep(1000)
-    {:reply, :math.sqrt(x), state}
+  def handle_cast(:do_work,  state) do
+    IO.puts("do_work: #{:erlang.system_time()}")
+    {:noreply, state}
   end
 end

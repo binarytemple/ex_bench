@@ -5,14 +5,14 @@ defmodule PocEventTimer do
 
 
 
-  def process() do
-    IO.puts("process: #{:erlang.system_time()}")
-    receive do
-      after
-        1_000 ->
-          GenServer.cast(PocEventTimer.Signaler, :next)
-          process()
-      end
-    end
+  # def process() do
+  #   IO.puts("process: #{:erlang.system_time()}")
+  #   receive do
+  #     after
+  #       1_000 ->
+  #         GenServer.cast(PocEventTimer.Signaler, :next)
+  #         process()
+  #     end
+  #   end
 
 end

@@ -54,7 +54,6 @@ defmodule PocEventTimer.Signaler do
     # Do the desired work here
     # Reschedule once more
     drift = ((:erlang.system_time() - invoked)  - @delay * 1_000_000) / 1_000_000
-    rounded = :erlang.round(1000875000 / 1000_000)
     corrected =  @delay  - :erlang.round(drift)
 
     Process.send_after(self(), { :work, :erlang.system_time()}, corrected)

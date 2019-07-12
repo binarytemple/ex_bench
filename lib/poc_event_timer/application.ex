@@ -9,8 +9,8 @@ defmodule PocEventTimer.Application do
     [
       {:name, {:local, :worker}},
       {:worker_module, PoolboyApp.Worker},
-      {:size, 5},
-      {:max_overflow, 2}
+      {:size, Application.get_env(:poc_event_timer, :workers)},
+      {:max_overflow, Application.get_env(:poc_event_timer, :overflow)}
     ]
   end
 
@@ -58,14 +58,27 @@ defmodule PocEventTimer.Signaler do
 
     Process.send_after(self(), { :work, :erlang.system_time()}, corrected)
     Logger.debug("drift :  #{drift},  corrected: #{corrected} ")
-    Task.async(fn ->
-      :poolboy.transaction(
+
+    workers = Application.get_env(:poc_event_timer, :workers)
+
+   handles =  1..workers |> Enum.map(
+
+    fn(_) ->
+        Task.async(fn ->
+        :poolboy.transaction(
         :worker,
         fn pid -> GenServer.cast(pid, :do_work) end,
         @timeout
       )
     end
     )
+  end
+    )
+
+    handles |> Enum.each(&Task.await(&1))
+
+
+
     {:noreply, state}
   end
 
@@ -75,12 +88,7 @@ defmodule PocEventTimer.Signaler do
     {:noreply, state}
   end
 
-
-
 end
-
-
-
 
 defmodule PoolboyApp.Worker do
   use GenServer

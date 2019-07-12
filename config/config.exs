@@ -10,7 +10,9 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :poc_event_timer, key: :value
+config :poc_event_timer,
+workers: 5,
+overflow: 2
 #
 # and access this configuration in your application as:
 #

@@ -33,7 +33,7 @@ defmodule PocEventTimer.Signaler do
         Task.async(fn ->
           :poolboy.transaction(
             :worker,
-            fn pid -> GenServer.cast(pid, :do_work) end,
+            fn pid -> GenServer.cast(pid, {:do_work,1}) end,
             @timeout
           )
         end)

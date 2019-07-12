@@ -12,10 +12,11 @@ defmodule PocEventTimer.MixProject do
   end
 
   # Run "mix help compile.app" to learn about applications.
-  # dont start the application automatically : mod: {PocEventTimer.Application, []}
+  # dont start the application automatically :
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {PocEventTimer.Application, []}
     ]
   end
 

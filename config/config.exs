@@ -13,7 +13,7 @@ use Mix.Config
 config :poc_event_timer,
   workers: 5,
   overflow: 2,
-  fun_to_call: fn x -> IO.inspect(x) end
+  bench_fun: fn x -> IO.inspect(x) end
 
 #
 # and access this configuration in your application as:

@@ -8,7 +8,7 @@ defmodule PocEventTimer.Application do
   defp poolboy_config do
     [
       {:name, {:local, :worker}},
-      {:worker_module, PoolboyApp.Worker},
+      {:worker_module, PocEventTimer.Worker},
       {:size, Application.get_env(:poc_event_timer, :workers)},
       {:max_overflow, Application.get_env(:poc_event_timer, :overflow)}
     ]

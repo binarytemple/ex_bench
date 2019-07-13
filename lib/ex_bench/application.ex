@@ -44,9 +44,7 @@ defmodule ExBench.Application do
   @default_filename "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
   @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def start_demo(
-        args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: @default_filename]
-      )
+  def start_demo(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: @default_filename])
       when is_list(args) do
     conf = [
       workers: 10,
@@ -78,11 +76,11 @@ defmodule ExBench.Application do
           Prometheus.Registry.register_collector(:prometheus_process_collector)
 
           cbs = [
-            Plug.Cowboy.child_spec(
-              scheme: :http,
-              plug: ExBench.Dev.Pipeline,
-              options: [port: 4000]
-            )
+            # Plug.Cowboy.child_spec(
+            #   scheme: :http,
+            #   plug: ExBench.Dev.Pipeline,
+            #   options: [port: 4001]
+            # )
           ]
 
           children ++ cbs

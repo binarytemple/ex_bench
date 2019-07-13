@@ -24,10 +24,11 @@ defmodule PocEventTimer.Application do
       delay: @delay
     }
 
-    Map.to_list(conf) |> Enum.each(
-      fn({k,nil}) -> raise("#{inspect(@appname)} #{inspect(k)} cannot be nil, check your config");
-      (_) -> :ok end
-      )
+    Map.to_list(conf)
+    |> Enum.each(fn
+      {k, nil} -> raise("#{inspect(@appname)} #{inspect(k)} cannot be nil, check your config")
+      _ -> :ok
+    end)
 
     conf
   end
@@ -37,12 +38,14 @@ defmodule PocEventTimer.Application do
   end
 
   def start_default() do
-    start([],[])
+    start([], [])
   end
 
   @spec prod_start_default(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def prod_start_default(args \\ [ bench_fun: fn x -> IO.inspect(x) end,
-    filename: "./test/consult.me"]) when is_list(args) do
+  def prod_start_default(
+        args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: "./test/consult.me"]
+      )
+      when is_list(args) do
     conf = [
       workers: 10,
       overflow: 2,
@@ -51,24 +54,25 @@ defmodule PocEventTimer.Application do
       producer: PocEventTimer.FileProducer,
       producer_argument: %{filename: args[:filename]}
     ]
-    conf |>  Enum.each( &Application.put_env(:poc_event_timer, elem(&1,0),elem(&1,1)   )  )
-    start([],[])
+
+    conf |> Enum.each(&Application.put_env(:poc_event_timer, elem(&1, 0), elem(&1, 1)))
+    start([], [])
   end
 
   def start(type, args) do
     Logger.debug("#{__MODULE__} start(#{inspect([type, args])})")
+
     children = [
-      :poolboy.child_spec(:worker, poolboy_config(),  bench_fun_config()),
-      {PocEventTimer.Signaler,  signaller_config() }
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
+      {PocEventTimer.Signaler, signaller_config()}
     ]
+
     opts = [strategy: :one_for_one, name: PocEventTimer.Supervisor]
     Supervisor.start_link(children, opts)
-
   end
 
   def stop() do
     Logger.debug("#{__MODULE__} terminating")
     Supervisor.stop(PocEventTimer.Supervisor)
   end
-
 end

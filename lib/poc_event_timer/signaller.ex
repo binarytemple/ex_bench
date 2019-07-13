@@ -11,11 +11,11 @@ defmodule PocEventTimer.Signaler do
           delay: _delay,
           bench_fun: _bench_fun
         } = args
-      )  do
+      ) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
-  def start_link(args),  do: Logger.error("Bad args: #{inspect(args)}")
+  def start_link(args), do: Logger.error("Bad args: #{inspect(args)}")
 
   defp start_link_producer(producer, producer_argument) do
     {:ok, gs} = GenStage.start_link(producer, producer_argument)
@@ -23,20 +23,25 @@ defmodule PocEventTimer.Signaler do
   end
 
   @impl true
-  def init( %{
-    producer: producer,
-    producer_argument: producer_argument,
-    concurrency: concurrency,
-    delay: delay
-  } = args) do
+  def init(
+        %{
+          producer: producer,
+          producer_argument: producer_argument,
+          concurrency: concurrency,
+          delay: delay
+        } = args
+      ) do
     Logger.debug("starting #{__MODULE__} , #{inspect(args)}")
     producer = start_link_producer(producer, producer_argument)
     Process.send_after(self(), {:work, :erlang.system_time()}, delay)
-    {:ok, %{producer: producer, concurrency: concurrency ,delay: delay }}
+    {:ok, %{producer: producer, concurrency: concurrency, delay: delay}}
   end
 
   @impl true
-  def handle_info({:work, invoked}, %{producer: producer, concurrency: concurrency ,delay: delay } = state) do
+  def handle_info(
+        {:work, invoked},
+        %{producer: producer, concurrency: concurrency, delay: delay} = state
+      ) do
     Logger.debug("handle_info: #{inspect([{:work, invoked}, state])}")
 
     drift = (:erlang.system_time() - invoked - delay * 1_000_000) / 1_000_000
@@ -45,10 +50,11 @@ defmodule PocEventTimer.Signaler do
     Process.send_after(self(), {:work, :erlang.system_time()}, corrected)
     Logger.debug("drift :  #{drift},  corrected: #{corrected} ")
 
-    params = GenStage.stream([{producer, max_demand: 1, cancel: :temporary}]) |> Enum.take(concurrency)
+    params =
+      GenStage.stream([{producer, max_demand: 1, cancel: :temporary}]) |> Enum.take(concurrency)
 
     handles =
-     params
+      params
       |> Enum.map(fn i ->
         Task.async(fn ->
           :poolboy.transaction(

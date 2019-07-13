@@ -1,6 +1,6 @@
 use Mix.Config
 
-#config :logger,
+# config :logger,
 #  backends: [:console],
 #    compile_time_purge_matching: [
 #          [level_lower_than: :info]
@@ -15,4 +15,3 @@ config :poc_event_timer,
   bench_fun: fn x -> IO.inspect(x) end,
   producer: PocEventTimer.FileProducer,
   producer_argument: %{filename: "./test/consult.me"}
-

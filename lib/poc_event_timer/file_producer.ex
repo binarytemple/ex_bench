@@ -3,14 +3,14 @@ defmodule PocEventTimer.FileProducer do
   alias PocEventTimer.FileProducer.LineParser
   require Logger
 
-  def start_link(%{filename:  filename}) do
-    GenStage.start_link(A, %{filename:  filename},name: filename)
+  def start_link(%{filename: filename}) do
+    GenStage.start_link(A, %{filename: filename}, name: filename)
   end
 
-  def init(%{filename:  filename}) do
+  def init(%{filename: filename}) do
     # {:ok, fh} = File.open(filename, [{:read_ahead, 1024 * 1024}] )
     # {:ok, fh} = File.open(filename, [{:read_ahead, 1024 * 1024},:raw] )
-    {:ok, fh} = File.open(filename )
+    {:ok, fh} = File.open(filename)
     {:producer, fh}
   end
 

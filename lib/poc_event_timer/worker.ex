@@ -1,18 +1,17 @@
 defmodule PocEventTimer.Worker do
   use GenServer
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, [])
+  def start_link(bench_fun) do
+    GenServer.start_link(__MODULE__, bench_fun, [])
   end
 
-  def init(_) do
-    {:ok, nil}
+  def init(bench_fun) do
+    {:ok, bench_fun}
   end
 
-  def handle_cast({:do_work,data}, state) do
-    bench_fun = Application.get_env(:poc_event_timer, :bench_fun)
+  def handle_cast({:do_work, data}, bench_fun) do
     IO.puts("do_work: #{:erlang.system_time()}")
     bench_fun.(data)
-    {:noreply, state}
+    {:noreply, bench_fun}
   end
 end

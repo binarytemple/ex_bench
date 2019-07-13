@@ -13,7 +13,10 @@ use Mix.Config
 config :poc_event_timer,
   workers: 5,
   overflow: 2,
-  bench_fun: fn x -> IO.inspect(x) end
+  concurrency: 5,
+  bench_fun: fn x -> IO.inspect(x) end,
+  producer: PocEventTimer.Producer,
+  producer_args: %{filename: "./test/consult.me"}
 
 #
 # and access this configuration in your application as:

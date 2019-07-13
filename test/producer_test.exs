@@ -4,7 +4,7 @@ defmodule PocEventTimer.ProducerTest do
 
   test "test gen_stage producer" do
     Process.flag(:trap_exit, true)
-    {:ok, gs} = GenStage.start_link(Producer, "./test/consult.me")
+    {:ok, gs} = GenStage.start_link(Producer, %{filename: "./test/consult.me"})
 
     pull = fn count ->
       GenStage.stream([{gs, max_demand: 1, cancel: :temporary}]) |> Enum.take(count)

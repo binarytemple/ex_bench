@@ -2,11 +2,11 @@ defmodule PocEventTimer.Producer do
   use GenStage
   alias PocEventTimer.LineParser
 
-  def start_link(filename) do
-    GenStage.start_link(A, filename)
+  def start_link(%{filename:  filename}) do
+    GenStage.start_link(A, %{filename:  filename})
   end
 
-  def init(filename) do
+  def init(%{filename:  filename}) do
     {:ok, fh} = File.open(filename)
     {:producer, fh}
   end

@@ -6,31 +6,31 @@ defmodule PocEventTimer.Signaler do
   def start_link(
         %{
           producer: _producer,
-          producer_args: producer_args,
+          producer_argument: _producer_argument,
           concurrency: _concurrency,
           delay: _delay,
           bench_fun: _bench_fun
         } = args
-      ) when is_map(producer_args) do
+      )  do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
   end
 
   def start_link(args),  do: Logger.error("Bad args: #{inspect(args)}")
 
-  defp start_link_producer(producer, args) do
-    {:ok, gs} = GenStage.start_link(producer, args)
+  defp start_link_producer(producer, producer_argument) do
+    {:ok, gs} = GenStage.start_link(producer, producer_argument)
     gs
   end
 
   @impl true
   def init( %{
     producer: producer,
-    producer_args: producer_args,
+    producer_argument: producer_argument,
     concurrency: concurrency,
     delay: delay
   } = args) do
     IO.puts("starting #{__MODULE__} , #{inspect(args)}")
-    producer = start_link_producer(producer, producer_args)
+    producer = start_link_producer(producer, producer_argument)
     Process.send_after(self(), {:work, :erlang.system_time()}, delay)
     {:ok, %{producer: producer, concurrency: concurrency ,delay: delay }}
   end

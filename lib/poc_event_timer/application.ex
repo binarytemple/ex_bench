@@ -18,7 +18,7 @@ defmodule PocEventTimer.Application do
     %{
       bench_fun: Application.get_env(:poc_event_timer, :bench_fun),
       producer: Application.get_env(:poc_event_timer, :producer),
-      producer_args: Application.get_env(:poc_event_timer, :producer_args),
+      producer_argument: Application.get_env(:poc_event_timer, :producer_argument),
       concurrency: Application.get_env(:poc_event_timer, :concurrency),
       delay: @delay
     }

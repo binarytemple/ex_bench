@@ -2,7 +2,7 @@ defmodule ExBench.Application do
   @moduledoc false
 
   use Application
-  @appname :poc_event_timer
+  @appname :ex_bench
   require Logger
   @delay 1000
 
@@ -49,13 +49,13 @@ defmodule ExBench.Application do
     conf = [
       workers: 10,
       overflow: 2,
-      concurrency: 5,
+      concurrency: 3,
       bench_fun: args[:bench_fun],
       producer: ExBench.FileProducer,
       producer_argument: %{filename: args[:filename]}
     ]
 
-    conf |> Enum.each(&Application.put_env(:poc_event_timer, elem(&1, 0), elem(&1, 1)))
+    conf |> Enum.each(&Application.put_env(@appname, elem(&1, 0), elem(&1, 1)))
     start([], [])
   end
 

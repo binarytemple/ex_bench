@@ -3,7 +3,7 @@ use Mix.Config
 config :logger,
   level: :debug
 
-config :poc_event_timer,
+config :ex_bench,
   workers: 10,
   overflow: 2,
   concurrency: 5,

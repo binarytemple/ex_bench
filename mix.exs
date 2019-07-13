@@ -50,7 +50,7 @@ defmodule ExBench.MixProject do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
-      {:telemetry_metrics_prometheus, "~> 0.2"},
+      {:telemetry_metrics_prometheus, "~> 0.2"}
     ]
   end
 
@@ -60,7 +60,7 @@ defmodule ExBench.MixProject do
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},
-      source_url: "https://github.com//bryanhuntesl/ex_bench",
+      source_url: "https://github.com//bryanhuntesl/ex_bench"
     ]
   end
 

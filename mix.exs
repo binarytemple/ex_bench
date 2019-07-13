@@ -27,8 +27,9 @@ defmodule ExBench.MixProject do
 
   def application(:dev) do
     IO.puts("application:dev")
+
     [
-      extra_applications: [ :cowboy ] ++  extra_applications() ,
+      extra_applications: [:cowboy] ++ extra_applications(),
       mod: {ExBench.Application, [[], []]}
     ]
   end
@@ -49,7 +50,7 @@ defmodule ExBench.MixProject do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
-      {:telemetry_metrics_prometheus, "~> 0.2"},
+      {:telemetry_metrics_prometheus, "~> 0.2"}
     ]
   end
 

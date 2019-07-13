@@ -8,6 +8,7 @@ defmodule ExBench.MixProject do
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
+      description: description(),
       deps: deps()
     ]
   end
@@ -62,5 +63,9 @@ defmodule ExBench.MixProject do
       homepage_url: "https://github.com/sescobb27/ex_bench",
       files: ~w(lib .formatter.exs mix.exs README.md LICENSE)
     ]
+  end
+
+  defp description() do
+    "An application you can use for benchmarking, read terms from a file (or other Producer) and execute them against an anonymous function of your choice"
   end
 end

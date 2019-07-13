@@ -5,7 +5,7 @@ defmodule PocEventTimer.MixProject do
     [
       app: :poc_event_timer,
       version: "0.1.0",
-      elixir: "~> 1.8",
+      elixir: "~> 1.5 or ~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]

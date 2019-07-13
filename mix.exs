@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.2",
+      version: "0.2.3",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -29,8 +29,8 @@ defmodule ExBench.MixProject do
     IO.puts("application:dev")
 
     [
-      extra_applications: extra_applications(),
-      mod: {ExBench.Application, [[], []]}
+      extra_applications: [:prometheus, :cowboy] ++ extra_applications(),
+      mod: {ExBench.Application, Mix.env()}
     ]
   end
 
@@ -47,6 +47,10 @@ defmodule ExBench.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # {:prometheus_ex, "~> 3.0", only: :dev, runtime: false},
+      # {:prometheus_ex, "~> 3.0", only: :dev, runtime: false},
+      {:prometheus_plugs, "~> 1.1.5"},
+      {:prometheus_process_collector, "~> 1.4", only: :dev, runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},

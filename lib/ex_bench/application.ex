@@ -2,7 +2,7 @@ defmodule ExBench.Application do
   @moduledoc false
 
   use Application
-  @appname :poc_event_timer
+  @appname :ex_bench
   require Logger
   @delay 1000
 
@@ -49,23 +49,45 @@ defmodule ExBench.Application do
     conf = [
       workers: 10,
       overflow: 2,
-      concurrency: 5,
+      concurrency: 3,
       bench_fun: args[:bench_fun],
       producer: ExBench.FileProducer,
       producer_argument: %{filename: args[:filename]}
     ]
 
-    conf |> Enum.each(&Application.put_env(:poc_event_timer, elem(&1, 0), elem(&1, 1)))
+    conf |> Enum.each(&Application.put_env(@appname, elem(&1, 0), elem(&1, 1)))
     start([], [])
   end
 
-  def start(type, args) do
-    Logger.debug("#{__MODULE__} start(#{inspect([type, args])})")
+  def start(type, env_type) do
+    Logger.debug("#{__MODULE__} start(#{inspect([type, env_type])})")
 
     children = [
       :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
       {ExBench.Signaler, signaller_config()}
     ]
+
+    # ugly - has side effect..
+    children =
+      case env_type do
+        :dev ->
+          ExBench.Metrics.CommandInstrumenter.setup()
+          ExBench.Dev.Metrics.PlugExporter.setup()
+          Prometheus.Registry.register_collector(:prometheus_process_collector)
+
+          cbs = [
+            Plug.Cowboy.child_spec(
+              scheme: :http,
+              plug: ExBench.Dev.Pipeline,
+              options: [port: 4000]
+            )
+          ]
+
+          children ++ cbs
+
+        _ ->
+          children
+      end
 
     opts = [strategy: :one_for_one, name: ExBench.Supervisor]
     Supervisor.start_link(children, opts)

@@ -41,9 +41,11 @@ defmodule ExBench.Application do
     start([], [])
   end
 
-  @spec prod_start_default(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def prod_start_default(
-        args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: "./test/consult.me"]
+  @default_filename "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
+
+  @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
+  def start_demo(
+        args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: @default_filename]
       )
       when is_list(args) do
     conf = [
@@ -56,7 +58,7 @@ defmodule ExBench.Application do
     ]
 
     conf |> Enum.each(&Application.put_env(@appname, elem(&1, 0), elem(&1, 1)))
-    start([], [])
+    start(nil, Mix.env())
   end
 
   def start(type, env_type) do

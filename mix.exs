@@ -60,7 +60,7 @@ defmodule ExBench.MixProject do
 
   defp package() do
     [
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE),
+      files: ~w(lib .formatter.exs mix.exs priv README.md LICENSE),
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

@@ -1,4 +1,4 @@
-defmodule PocEventTimer.Worker do
+defmodule ExBench.Worker do
   use GenServer
 
   def start_link(bench_fun) do

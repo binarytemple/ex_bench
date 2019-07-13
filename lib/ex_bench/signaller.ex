@@ -1,4 +1,4 @@
-defmodule PocEventTimer.Signaler do
+defmodule ExBench.Signaler do
   use GenServer
   require Logger
   @timeout 60000

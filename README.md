@@ -1,6 +1,6 @@
-# PocEventTimer
+# ExBench
 
-## Drift
+An application for white box load testing 
 
 ## Configuration
 
@@ -10,7 +10,7 @@ config :poc_event_timer,
   overflow: 2, # temporarily allocate these if needed
   concurrency: 2, # how many instances of the task should be run in parallel
   bench_fun: fn x -> IO.inspect(x) end, # the function that you apply to each line of input
-  producer: PocEventTimer.Producer, # this produces the inputs (in this example, it reads them from the specified file)
+  producer: ExBench.FileProducer, # this produces the inputs (in this example, it reads them from the specified file)
   producer_argument: %{filename: "./test/consult.me"} # the argument applied to producer.init/1
 ```
 

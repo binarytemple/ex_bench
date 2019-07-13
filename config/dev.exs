@@ -8,5 +8,5 @@ config :poc_event_timer,
   overflow: 2,
   concurrency: 5,
   bench_fun: fn x -> IO.inspect(x) end,
-  producer: PocEventTimer.FileProducer,
+  producer: ExBench.FileProducer,
   producer_argument: %{filename: "./test/consult.me"}

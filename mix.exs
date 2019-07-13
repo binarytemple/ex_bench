@@ -1,9 +1,9 @@
-defmodule PocEventTimer.MixProject do
+defmodule ExBench.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :poc_event_timer,
+      app: :ex_bench,
       version: "0.2.0",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
@@ -28,7 +28,7 @@ defmodule PocEventTimer.MixProject do
 
     [
       extra_applications: extra_applications(),
-      mod: {PocEventTimer.Application, [[], []]}
+      mod: {ExBench.Application, [[], []]}
     ]
   end
 

@@ -1,10 +1,10 @@
-defmodule PocEventTimer.Producer do
+defmodule PocEventTimer.FileProducer do
   use GenStage
-  alias PocEventTimer.LineParser
+  alias PocEventTimer.FileProducer.LineParser
   require Logger
 
   def start_link(%{filename:  filename}) do
-    GenStage.start_link(A, %{filename:  filename})
+    GenStage.start_link(A, %{filename:  filename},name: filename)
   end
 
   def init(%{filename:  filename}) do

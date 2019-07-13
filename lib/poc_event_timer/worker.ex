@@ -10,7 +10,6 @@ defmodule PocEventTimer.Worker do
   end
 
   def handle_cast({:do_work, data}, bench_fun) do
-    # IO.puts("do_work: #{:erlang.system_time()}")
     bench_fun.(data)
     {:noreply, bench_fun}
   end

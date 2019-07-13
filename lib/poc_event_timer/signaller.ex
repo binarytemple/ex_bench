@@ -29,7 +29,7 @@ defmodule PocEventTimer.Signaler do
     concurrency: concurrency,
     delay: delay
   } = args) do
-    IO.puts("starting #{__MODULE__} , #{inspect(args)}")
+    Logger.debug("starting #{__MODULE__} , #{inspect(args)}")
     producer = start_link_producer(producer, producer_argument)
     Process.send_after(self(), {:work, :erlang.system_time()}, delay)
     {:ok, %{producer: producer, concurrency: concurrency ,delay: delay }}
@@ -37,7 +37,7 @@ defmodule PocEventTimer.Signaler do
 
   @impl true
   def handle_info({:work, invoked}, %{producer: producer, concurrency: concurrency ,delay: delay } = state) do
-    IO.puts("handle_info: #{inspect([{:work, invoked}, state])}")
+    Logger.debug("handle_info: #{inspect([{:work, invoked}, state])}")
 
     drift = (:erlang.system_time() - invoked - delay * 1_000_000) / 1_000_000
     corrected = delay - :erlang.round(drift)
@@ -66,7 +66,7 @@ defmodule PocEventTimer.Signaler do
 
   @impl true
   def handle_info(x, state) do
-    IO.puts("handle_info: #{inspect(x)}")
+    Logger.debug("handle_info: #{inspect(x)}")
     {:noreply, state}
   end
 end

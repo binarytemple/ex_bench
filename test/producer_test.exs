@@ -1,10 +1,10 @@
-defmodule PocEventTimer.ProducerTest do
+defmodule PocEventTimer.FileProducerTest do
   use ExUnit.Case
-  alias PocEventTimer.Producer
+  alias PocEventTimer.FileProducer
 
   test "test gen_stage producer" do
     Process.flag(:trap_exit, true)
-    {:ok, gs} = GenStage.start_link(Producer, %{filename: "./test/consult.me"})
+    {:ok, gs} = GenStage.start_link(FileProducer, %{filename: "./test/consult.me"})
 
     pull = fn count ->
       GenStage.stream([{gs, max_demand: 1, cancel: :temporary}]) |> Enum.take(count)

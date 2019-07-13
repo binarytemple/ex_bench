@@ -36,12 +36,13 @@ defmodule ExBench.Application do
     Application.get_env(:ex_bench, :bench_fun)
   end
 
-  defp default_filename() , do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
+  defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
   @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
   def start_demo(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-        Application.ensure_all_started(:telemetry)
+    Application.ensure_all_started(:telemetry)
+
     conf = [
       workers: 10,
       overflow: 2,

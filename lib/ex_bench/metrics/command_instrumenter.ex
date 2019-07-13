@@ -1,4 +1,3 @@
-
 defmodule ExBench.Metrics.CommandInstrumenter do
   use Prometheus.Metric
 
@@ -10,7 +9,7 @@ defmodule ExBench.Metrics.CommandInstrumenter do
     )
 
     events = [
-      [:ex_bench, :worker],
+      [:ex_bench, :worker]
     ]
 
     :telemetry.attach_many("ex_bench-commands", events, &handle_event/4, nil)
@@ -19,8 +18,4 @@ defmodule ExBench.Metrics.CommandInstrumenter do
   def handle_event([:ex_bench, :worker], _count, _metadata = %{command: command}, _config) do
     Counter.inc(name: :ex_bench_worker, labels: [command])
   end
-
 end
-
-
-

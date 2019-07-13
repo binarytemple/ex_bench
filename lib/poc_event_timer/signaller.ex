@@ -2,38 +2,64 @@ defmodule PocEventTimer.Signaler do
   use GenServer
   require Logger
   @timeout 60000
-  @delay 1000
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  def start_link(
+        %{
+          producer: _producer,
+          producer_argument: _producer_argument,
+          concurrency: _concurrency,
+          delay: _delay,
+          bench_fun: _bench_fun
+        } = args
+      ) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  def start_link(args), do: Logger.error("Bad args: #{inspect(args)}")
+
+  defp start_link_producer(producer, producer_argument) do
+    {:ok, gs} = GenStage.start_link(producer, producer_argument)
+    gs
   end
 
   @impl true
-  def init(_) do
-    IO.puts("starting #{__MODULE__}")
-    Process.send_after(self(), {:work, :erlang.system_time()}, @delay)
-    {:ok, nil}
+  def init(
+        %{
+          producer: producer,
+          producer_argument: producer_argument,
+          concurrency: concurrency,
+          delay: delay
+        } = args
+      ) do
+    Logger.debug("starting #{__MODULE__} , #{inspect(args)}")
+    producer = start_link_producer(producer, producer_argument)
+    Process.send_after(self(), {:work, :erlang.system_time()}, delay)
+    {:ok, %{producer: producer, concurrency: concurrency, delay: delay}}
   end
 
   @impl true
-  def handle_info({:work, invoked}, state) do
-    # Do the desired work here
-    # Reschedule once more
-    drift = (:erlang.system_time() - invoked - @delay * 1_000_000) / 1_000_000
-    corrected = @delay - :erlang.round(drift)
+  def handle_info(
+        {:work, invoked},
+        %{producer: producer, concurrency: concurrency, delay: delay} = state
+      ) do
+    Logger.debug("handle_info: #{inspect([{:work, invoked}, state])}")
+
+    drift = (:erlang.system_time() - invoked - delay * 1_000_000) / 1_000_000
+    corrected = delay - :erlang.round(drift)
 
     Process.send_after(self(), {:work, :erlang.system_time()}, corrected)
     Logger.debug("drift :  #{drift},  corrected: #{corrected} ")
 
-    workers = Application.get_env(:poc_event_timer, :workers)
+    params =
+      GenStage.stream([{producer, max_demand: 1, cancel: :temporary}]) |> Enum.take(concurrency)
 
     handles =
-      1..workers
-      |> Enum.map(fn _ ->
+      params
+      |> Enum.map(fn i ->
         Task.async(fn ->
           :poolboy.transaction(
             :worker,
-            fn pid -> GenServer.cast(pid, :do_work) end,
+            fn pid -> GenServer.cast(pid, {:do_work, i}) end,
             @timeout
           )
         end)
@@ -46,7 +72,7 @@ defmodule PocEventTimer.Signaler do
 
   @impl true
   def handle_info(x, state) do
-    IO.puts("handle_info: #{inspect(x)}")
+    Logger.debug("handle_info: #{inspect(x)}")
     {:noreply, state}
   end
 end

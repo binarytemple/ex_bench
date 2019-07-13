@@ -1,4 +1,4 @@
-defmodule PocEventTimer.Application do
+defmodule ExBench.Application do
   @moduledoc false
 
   use Application
@@ -9,7 +9,7 @@ defmodule PocEventTimer.Application do
   def poolboy_config do
     [
       {:name, {:local, :worker}},
-      {:worker_module, PocEventTimer.Worker},
+      {:worker_module, ExBench.Worker},
       {:size, Application.get_env(@appname, :workers)},
       {:max_overflow, Application.get_env(@appname, :overflow)}
     ]
@@ -51,7 +51,7 @@ defmodule PocEventTimer.Application do
       overflow: 2,
       concurrency: 5,
       bench_fun: args[:bench_fun],
-      producer: PocEventTimer.FileProducer,
+      producer: ExBench.FileProducer,
       producer_argument: %{filename: args[:filename]}
     ]
 
@@ -64,15 +64,15 @@ defmodule PocEventTimer.Application do
 
     children = [
       :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {PocEventTimer.Signaler, signaller_config()}
+      {ExBench.Signaler, signaller_config()}
     ]
 
-    opts = [strategy: :one_for_one, name: PocEventTimer.Supervisor]
+    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
   def stop() do
     Logger.debug("#{__MODULE__} terminating")
-    Supervisor.stop(PocEventTimer.Supervisor)
+    Supervisor.stop(ExBench.Supervisor)
   end
 end

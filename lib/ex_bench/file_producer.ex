@@ -1,6 +1,6 @@
-defmodule PocEventTimer.FileProducer do
+defmodule ExBench.FileProducer do
   use GenStage
-  alias PocEventTimer.FileProducer.LineParser
+  alias ExBench.FileProducer.LineParser
   require Logger
 
   def start_link(%{filename: filename}) do

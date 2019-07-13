@@ -1,12 +1,14 @@
-defmodule PocEventTimer.MixProject do
+defmodule ExBench.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :poc_event_timer,
-      version: "0.2.0",
+      app: :ex_bench,
+      version: "0.2.2",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
+      package: package(),
+      description: description(),
       deps: deps()
     ]
   end
@@ -28,7 +30,7 @@ defmodule PocEventTimer.MixProject do
 
     [
       extra_applications: extra_applications(),
-      mod: {PocEventTimer.Application, [[], []]}
+      mod: {ExBench.Application, [[], []]}
     ]
   end
 
@@ -45,11 +47,24 @@ defmodule PocEventTimer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:poolboy, "~> 1.5"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
+      {:poolboy, "~> 1.5"},
       {:telemetry_metrics_prometheus, "~> 0.2"}
-
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
+  end
+
+  defp package() do
+    [
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE),
+      homepage_url: "https://github.com/bryanhuntesl/ex_bench",
+      licenses: ["Apache 2"],
+      links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},
+      source_url: "https://github.com//bryanhuntesl/ex_bench"
+    ]
+  end
+
+  defp description() do
+    "An application you can use for benchmarking, read terms from a file (or other Producer) and execute them against an anonymous function of your choice"
   end
 end

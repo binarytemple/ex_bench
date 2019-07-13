@@ -1,4 +1,4 @@
-defmodule PocEventTimer.FileProducer.LineParser do
+defmodule ExBench.FileProducer.LineParser do
   def parse({:ok, line}), do: parse(line)
 
   def parse(line) do

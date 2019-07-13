@@ -1,6 +1,6 @@
-defmodule PocEventTimer.FileProducerTest do
+defmodule ExBench.FileProducerTest do
   use ExUnit.Case
-  alias PocEventTimer.FileProducer
+  alias ExBench.FileProducer
 
   test "test gen_stage producer" do
     Process.flag(:trap_exit, true)

@@ -67,10 +67,11 @@ defmodule ExBench.Application do
       {ExBench.Signaler, signaller_config()}
     ]
 
-    # has side effect..
+    # ugly - has side effect..
     children =
       case env_type do
         :dev ->
+          ExBench.Metrics.CommandInstrumenter.setup()
           ExBench.Dev.Metrics.PlugExporter.setup()
           Prometheus.Registry.register_collector(:prometheus_process_collector)
 

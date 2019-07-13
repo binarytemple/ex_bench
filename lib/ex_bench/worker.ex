@@ -10,7 +10,10 @@ defmodule ExBench.Worker do
   end
 
   def handle_cast({:do_work, data}, bench_fun) do
+
+    :telemetry.execute([:ex_bench, :worker], 1, %{command: "allocated_work"})
     bench_fun.(data)
+    :telemetry.execute([:ex_bench, :worker], 1, %{command: "processed_work"})
     {:noreply, bench_fun}
   end
 end

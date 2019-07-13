@@ -47,7 +47,7 @@ defmodule ExBench.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
       {:telemetry_metrics_prometheus, "~> 0.2"},

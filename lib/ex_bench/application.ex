@@ -2,7 +2,6 @@ defmodule ExBench.Application do
   @moduledoc false
 
   use Application
-  @appname :ex_bench
   require Logger
   @delay 1000
 
@@ -10,23 +9,23 @@ defmodule ExBench.Application do
     [
       {:name, {:local, :worker}},
       {:worker_module, ExBench.Worker},
-      {:size, Application.get_env(@appname, :workers)},
-      {:max_overflow, Application.get_env(@appname, :overflow)}
+      {:size, Application.get_env(:ex_bench, :workers)},
+      {:max_overflow, Application.get_env(:ex_bench, :overflow)}
     ]
   end
 
   def signaller_config() do
     conf = %{
-      bench_fun: Application.get_env(@appname, :bench_fun),
-      producer: Application.get_env(@appname, :producer),
-      producer_argument: Application.get_env(@appname, :producer_argument),
-      concurrency: Application.get_env(@appname, :concurrency),
+      bench_fun: Application.get_env(:ex_bench, :bench_fun),
+      producer: Application.get_env(:ex_bench, :producer),
+      producer_argument: Application.get_env(:ex_bench, :producer_argument),
+      concurrency: Application.get_env(:ex_bench, :concurrency),
       delay: @delay
     }
 
     Map.to_list(conf)
     |> Enum.each(fn
-      {k, nil} -> raise("#{inspect(@appname)} #{inspect(k)} cannot be nil, check your config")
+      {k, nil} -> raise("#{inspect(:ex_bench)} #{inspect(k)} cannot be nil, check your config")
       _ -> :ok
     end)
 
@@ -34,18 +33,16 @@ defmodule ExBench.Application do
   end
 
   def bench_fun_config() do
-    Application.get_env(@appname, :bench_fun)
+    Application.get_env(:ex_bench, :bench_fun)
   end
 
-  def start_default() do
-    start([], [])
-  end
+  defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
-  @spec prod_start_default(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def prod_start_default(
-        args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: "./test/consult.me"]
-      )
+  @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
+  def start_demo(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
+    Application.ensure_all_started(:telemetry)
+
     conf = [
       workers: 10,
       overflow: 2,
@@ -55,12 +52,12 @@ defmodule ExBench.Application do
       producer_argument: %{filename: args[:filename]}
     ]
 
-    conf |> Enum.each(&Application.put_env(@appname, elem(&1, 0), elem(&1, 1)))
-    start([], [])
+    conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
+    start(nil, Mix.env())
   end
 
-  def start(type, env_type) do
-    Logger.debug("#{__MODULE__} start(#{inspect([type, env_type])})")
+  def start(start_type, env_type) do
+    Logger.debug("#{__MODULE__} start(#{inspect([start_type, env_type])})")
 
     children = [
       :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
@@ -75,13 +72,20 @@ defmodule ExBench.Application do
           ExBench.Dev.Metrics.PlugExporter.setup()
           Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-          cbs = [
-            Plug.Cowboy.child_spec(
-              scheme: :http,
-              plug: ExBench.Dev.Pipeline,
-              options: [port: 4000]
-            )
-          ]
+          cbs =
+            case start_type do
+              nil ->
+                []
+
+              _ ->
+                [
+                  Plug.Cowboy.child_spec(
+                    scheme: :http,
+                    plug: ExBench.Dev.Pipeline,
+                    options: [port: 4000]
+                  )
+                ]
+            end
 
           children ++ cbs
 

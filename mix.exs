@@ -47,21 +47,20 @@ defmodule ExBench.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:poolboy, "~> 1.5"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       {:gen_stage, "~> 0.14"},
-      {:telemetry_metrics_prometheus, "~> 0.2"}
-
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:poolboy, "~> 1.5"},
+      {:telemetry_metrics_prometheus, "~> 0.2"},
     ]
   end
 
   defp package() do
     [
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE),
+      homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},
       source_url: "https://github.com//bryanhuntesl/ex_bench",
-      homepage_url: "https://github.com/sescobb27/ex_bench",
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE)
     ]
   end
 

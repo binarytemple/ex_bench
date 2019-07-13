@@ -1,1 +1,2 @@
-
+config :logger,
+  level: :debug

@@ -7,6 +7,7 @@ defmodule ExBench.MixProject do
       version: "0.2.0",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
+      package: package(),
       deps: deps()
     ]
   end
@@ -50,6 +51,16 @@ defmodule ExBench.MixProject do
       {:telemetry_metrics_prometheus, "~> 0.2"}
 
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+    ]
+  end
+
+  defp package() do
+    [
+      licenses: ["Apache 2"],
+      links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},
+      source_url: "https://github.com//bryanhuntesl/ex_bench",
+      homepage_url: "https://github.com/sescobb27/ex_bench",
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE)
     ]
   end
 end

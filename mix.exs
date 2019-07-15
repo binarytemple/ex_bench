@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.4",
+      version: "0.2.5",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -13,28 +13,38 @@ defmodule ExBench.MixProject do
     ]
   end
 
+  def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
+
   def application() do
-    application(Mix.env())
+    application(Mix.env(), is_dependency())
   end
 
-  # Run "mix help compile.app" to learn about applications.
-  # dont start the application automatically :
-  def application(:test) do
+  def application(:test, _) do
     [
       extra_applications: extra_applications()
     ]
   end
 
-  def application(:dev) do
-    IO.puts("application:dev")
-
+  def application(:dev, false) do
     [
       extra_applications: [:prometheus, :cowboy] ++ extra_applications(),
       mod: {ExBench.Application, Mix.env()}
     ]
   end
 
-  def application(:prod) do
+  def application(:dev, true) do
+    [
+      extra_applications: extra_applications()
+    ]
+  end
+
+  def application(:prod, false) do
+    [
+      extra_applications: [:prometheus, :cowboy] ++ extra_applications()
+    ]
+  end
+
+  def application(:prod, true) do
     [
       extra_applications: extra_applications()
     ]
@@ -48,9 +58,9 @@ defmodule ExBench.MixProject do
   defp deps do
     [
       # {:prometheus_ex, "~> 3.0", only: :dev, runtime: false},
-      # {:prometheus_ex, "~> 3.0", only: :dev, runtime: false},
-      {:prometheus_plugs, "~> 1.1.5"},
-      {:prometheus_process_collector, "~> 1.4", only: :dev, runtime: false},
+      {:prometheus_ex, "~> 3.0", runtime: false},
+      {:prometheus_plugs, "~> 1.1.5", runtime: false},
+      {:prometheus_process_collector, "~> 1.4", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
@@ -60,7 +70,8 @@ defmodule ExBench.MixProject do
 
   defp package() do
     [
-      files: ~w(lib .formatter.exs mix.exs priv README.md LICENSE),
+      files:
+        ~w( lib/ex_bench/metrics lib/ex_bench/file_producer lib/ex_bench/worker.ex lib/ex_bench/signaller.ex lib/ex_bench/application.ex lib/ex_bench/file_producer.ex .formatter.exs mix.exs priv README.md LICENSE),
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

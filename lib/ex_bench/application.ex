@@ -38,10 +38,10 @@ defmodule ExBench.Application do
 
   defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
-  @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def start_demo(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
+  @spec run(keyword) :: :ignore | {:error, any} | {:ok, pid}
+  def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    Application.ensure_all_started(:telemetry)
+    # Application.ensure_all_started(:telemetry)
 
     conf = [
       workers: 10,
@@ -56,45 +56,43 @@ defmodule ExBench.Application do
     start(nil, Mix.env())
   end
 
+  @running_as_dependency Keyword.get(Mix.Project.config(), :app) != :ex_bench
+
   def start(start_type, env_type) do
     Logger.debug("#{__MODULE__} start(#{inspect([start_type, env_type])})")
+    Logger.info("#{__MODULE__} running as dependency == #{@running_as_dependency}")
 
-    children = [
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {ExBench.Signaler, signaller_config()}
-    ]
+    case @running_as_dependency do
+      false ->
+        ExBench.Metrics.CommandInstrumenter.setup()
+        ExBench.Dev.Metrics.PlugExporter.setup()
+        Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-    # ugly - has side effect..
-    children =
-      case env_type do
-        :dev ->
-          ExBench.Metrics.CommandInstrumenter.setup()
-          ExBench.Dev.Metrics.PlugExporter.setup()
-          Prometheus.Registry.register_collector(:prometheus_process_collector)
+        children = [
+          Plug.Cowboy.child_spec(
+            scheme: :http,
+            plug: ExBench.Dev.Pipeline,
+            options: [port: 4000]
+          ),
+          :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
+          {ExBench.Signaler, signaller_config()}
+        ]
 
-          cbs =
-            case start_type do
-              nil ->
-                []
+        opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+        Supervisor.start_link(children, opts)
 
-              _ ->
-                [
-                  Plug.Cowboy.child_spec(
-                    scheme: :http,
-                    plug: ExBench.Dev.Pipeline,
-                    options: [port: 4000]
-                  )
-                ]
-            end
+      # don't start cowboy for metrics endpoint
+      true ->
+        ExBench.Metrics.CommandInstrumenter.setup()
+        Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-          children ++ cbs
+        children = [
+          :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
+        ]
 
-        _ ->
-          children
-      end
-
-    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
-    Supervisor.start_link(children, opts)
+        opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+        Supervisor.start_link(children, opts)
+    end
   end
 
   def stop() do

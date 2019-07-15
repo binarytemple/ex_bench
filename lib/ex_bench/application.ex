@@ -5,6 +5,9 @@ defmodule ExBench.Application do
   require Logger
   @delay 1000
 
+
+  def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
+
   def poolboy_config do
     [
       {:name, {:local, :worker}},
@@ -56,13 +59,11 @@ defmodule ExBench.Application do
     start(nil, Mix.env())
   end
 
-  @running_as_dependency Keyword.get(Mix.Project.config(), :app) != :ex_bench
-
   def start(start_type, env_type) do
     Logger.debug("#{__MODULE__} start(#{inspect([start_type, env_type])})")
-    Logger.info("#{__MODULE__} running as dependency == #{@running_as_dependency}")
+    Logger.info("#{__MODULE__} running as dependency == #{is_dependency()}")
 
-    case @running_as_dependency do
+    case is_dependency() do
       false ->
         ExBench.Metrics.CommandInstrumenter.setup()
         ExBench.Dev.Metrics.PlugExporter.setup()

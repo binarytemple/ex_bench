@@ -85,6 +85,7 @@ defmodule ExBench.Application do
       # don't start cowboy for metrics endpoint
       true ->
         ExBench.Metrics.CommandInstrumenter.setup()
+        ExBench.Dev.Metrics.PlugExporter.setup()
         Prometheus.Registry.register_collector(:prometheus_process_collector)
 
         children = [

@@ -66,7 +66,7 @@ defmodule ExBench.Application do
     case is_dependency() do
       false ->
         ExBench.Metrics.CommandInstrumenter.setup()
-        ExBench.Dev.Metrics.PlugExporter.setup()
+        ExBench.Metrics.PlugExporter.setup()
         Prometheus.Registry.register_collector(:prometheus_process_collector)
 
         children = [
@@ -85,7 +85,7 @@ defmodule ExBench.Application do
       # don't start cowboy for metrics endpoint
       true ->
         ExBench.Metrics.CommandInstrumenter.setup()
-        ExBench.Dev.Metrics.PlugExporter.setup()
+        ExBench.Metrics.PlugExporter.setup()
         Prometheus.Registry.register_collector(:prometheus_process_collector)
 
         children = [

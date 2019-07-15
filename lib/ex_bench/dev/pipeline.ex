@@ -5,6 +5,6 @@ defmodule ExBench.Dev.Pipeline do
   # given plug.
   use Plug.Builder
   plug(Plug.Logger)
-  plug(ExBench.Dev.Metrics.PlugExporter, %{})
+  plug(ExBench.Metrics.PlugExporter, %{})
   plug(ExBench.Dev.Plug.Root, %{})
 end

@@ -43,8 +43,6 @@ defmodule ExBench.Application do
 
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-
-
     # IO.puts("RUN ARGS #{inspect(args)}")
 
     conf = %{
@@ -56,6 +54,7 @@ defmodule ExBench.Application do
       producer_argument: %{filename: args[:filename]},
       delay: @delay
     }
+
     # conf[:bench_fun].("HELLO WORLD")
     ExBench.DynamicSupervisor.start_child(generate_poolboy_spec(conf[:bench_fun]))
     ExBench.DynamicSupervisor.start_child({ExBench.Signaler, conf})
@@ -82,12 +81,13 @@ defmodule ExBench.Application do
       restart: :permanent,
       shutdown: 500
     }
+
     IO.inspect(spec)
   end
 
   def start(_type, _args) do
     # [:telemetry,:telemetry_metrics_prometheus, :gen_stage]
-    [ :gen_stage]
+    [:gen_stage]
     |> Enum.each(&Application.ensure_all_started(&1))
 
     case is_dependency() do
@@ -104,6 +104,7 @@ defmodule ExBench.Application do
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
     Prometheus.Registry.register_collector(:prometheus_process_collector)
+
     children_base = [
       Plug.Cowboy.child_spec(
         scheme: :http,
@@ -135,6 +136,7 @@ defmodule ExBench.Application do
   def start_as_dependency() do
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
+
     children = [
       {ExBench.DynamicSupervisor, []}
     ]

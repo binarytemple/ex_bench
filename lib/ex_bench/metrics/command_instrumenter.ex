@@ -19,9 +19,7 @@ defmodule ExBench.Metrics.CommandInstrumenter do
     Counter.inc(name: :ex_bench_worker, labels: [command])
   end
 
-def counter_inc( %{command: command} ) do
+  def counter_inc(%{command: command}) do
     Counter.inc(name: :ex_bench_worker, labels: [command])
   end
-
-
 end

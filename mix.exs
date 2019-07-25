@@ -25,7 +25,10 @@ defmodule ExBench.MixProject do
   end
 
   def dependent_application() do
-    []
+    [
+      # extra_applications: [:logger,  :telemetry ],
+      extra_applications: [:logger ],
+    ]
   end
 
   def application(:test) do
@@ -36,14 +39,16 @@ defmodule ExBench.MixProject do
 
   def application(:dev) do
     [
-      extra_applications: [:prometheus, :cowboy, :logger,  :telemetry, :telemetry_metrics_prometheus],
+      # extra_applications: [:prometheus, :cowboy, :logger,  :telemetry, :telemetry_metrics_prometheus],
+      extra_applications: [:prometheus, :cowboy, :logger],
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
   def application(:prod) do
     [
-      extra_applications: [:prometheus, :cowboy, :logger, :telemetry, :telemetry_metrics_prometheus],
+      # extra_applications: [:prometheus, :cowboy, :logger, :telemetry, :telemetry_metrics_prometheus],
+      extra_applications: [:prometheus, :cowboy, :logger ],
       mod: {ExBench.Application, [[], []]}
     ]
   end
@@ -55,10 +60,11 @@ defmodule ExBench.MixProject do
       {:prometheus_plugs, "~> 1.1.5", runtime: false},
       {:prometheus_process_collector, "~> 1.4", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:telemetry_metrics_prometheus, "~> 0.2", runtime: false},
+      {:plug_cowboy, "~> 2.1"},
+      # {:telemetry_metrics_prometheus, "~> 0.2", runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
-      {:telemetry, "~> 0.4"}
+      # {:telemetry, "~> 0.4"}
     ]
   end
 

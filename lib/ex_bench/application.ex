@@ -43,8 +43,7 @@ defmodule ExBench.Application do
 
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    [:telemetry, :gen_stage, :poolboy]
-    |> Enum.each(&Application.ensure_all_started(&1))
+
 
     # IO.puts("RUN ARGS #{inspect(args)}")
 
@@ -87,7 +86,9 @@ defmodule ExBench.Application do
   end
 
   def start(_type, _args) do
-    # IO.puts("Logger not yet started")
+    # [:telemetry,:telemetry_metrics_prometheus, :gen_stage]
+    [ :gen_stage]
+    |> Enum.each(&Application.ensure_all_started(&1))
 
     case is_dependency() do
       false ->
@@ -132,9 +133,9 @@ defmodule ExBench.Application do
   end
 
   def start_as_dependency() do
-
+    ExBench.Metrics.CommandInstrumenter.setup()
+    ExBench.Metrics.PlugExporter.setup()
     children = [
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
       {ExBench.DynamicSupervisor, []}
     ]
 

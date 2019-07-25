@@ -69,7 +69,7 @@ defmodule ExBench.Application do
            max_overflow: 10
          ]
        ) do
-    spec = %{
+    %{
       id: :poolboy,
       start:
         {:poolboy, :start_link,
@@ -81,8 +81,6 @@ defmodule ExBench.Application do
       restart: :permanent,
       shutdown: 500
     }
-
-    IO.inspect(spec)
   end
 
   def start(_type, _args) do

@@ -1,3 +1,17 @@
+defmodule ExBench.Supervisor do
+  # Automatically defines child_spec/1
+  use DynamicSupervisor
+
+  def start_link(init_arg) do
+    DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
+
+  @impl true
+  def init(_init_arg) do
+    DynamicSupervisor.init(strategy: :one_for_one)
+  end
+end
+
 defmodule ExBench.Application do
   @moduledoc false
 
@@ -6,6 +20,7 @@ defmodule ExBench.Application do
   @delay 1000
 
   def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
+  def mix_env(), do: Mix.env()
 
   def poolboy_config do
     [
@@ -46,49 +61,62 @@ defmodule ExBench.Application do
     [:telemetry, :gen_stage, :poolboy, :telemetry_metrics_prometheus]
     |> Enum.each(&Application.ensure_all_started(&1))
 
-    conf = [
+    conf = %{
       workers: 10,
       overflow: 2,
       concurrency: 3,
       bench_fun: args[:bench_fun],
       producer: ExBench.FileProducer,
       producer_argument: %{filename: args[:filename]}
-    ]
+    }
 
-    conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
-    start(nil, Mix.env())
+    # conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
+
+    DynamicSupervisor.start_child(
+      ExBench.DynamicSupervisor,
+      %{
+        id: ExBench.Signaler,
+        start: {ExBench.Signaler, :start_link, [conf]}
+      }
+    )
   end
 
-  def start(start_type, env_type) do
+  def start(_type, _args) do
     :io.format("Logger not started", [])
-    Logger.warn("#{__MODULE__} start(#{inspect([start_type, env_type])})")
-    Logger.warn("#{__MODULE__} running as dependency == #{is_dependency()}")
+    # Logger.error("#{__MODULE__} start(#{inspect([start_type, env_type])})")
+    # Logger.error("#{__MODULE__} running as dependency == #{is_dependency()}")
 
     case is_dependency() do
       false ->
-        start_as_app()
+        start_as_standalone_app(mix_env())
 
       true ->
         start_as_dependency()
     end
   end
 
-  def start_as_app() do
+  def start_as_standalone_app(env) do
+    Logger.warn("starting as standalone app, env: #{env}")
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
     Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-    children = [
+    children_basic = [
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: ExBench.Dev.Pipeline,
-        options: [port: 4000]
+        options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
       ),
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {ExBench.Signaler, signaller_config()}
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
     ]
 
-    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+    children =
+      case env do
+        :prod -> children_basic
+        :dev -> children_basic ++ [{ExBench.Signaler, signaller_config()}]
+      end
+
+    opts = [strategy: :one_for_one, name: ExBench.DynamicSupervisor]
     Supervisor.start_link(children, opts)
   end
 

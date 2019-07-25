@@ -1,6 +1,6 @@
 # ExBench
 
-[![CI status](https://travis-ci.org/bryanhuntesl/ex_bench.svg?branch=master)](https://travis-ci.org/bryanhuntesl/ex_bench)
+[![CI status](https://travis-ci.org/bryanhuntesl/ex_bench.svg?branch=master)](https://travis-ci.org/bryanhuntesl/ex_bench) / [Hexdocs](https://hexdocs.pm/ex_bench/)
 
 An application for white box load testing 
 
@@ -31,7 +31,7 @@ The startup behavior of this application depends on whether you embed it as a de
 | Standalone          | :prod       | starts application, webserver, prometheus and prometheus export to :4000/metrics - doesn't run the default task until you execute [ExBench.Application.run](https://hexdocs.pm/ex_bench/ExBench.Application.html#run/1) |
 | Standalone          | :test       | starts :logger, all scafolding is carried out in the tests/test helper
 
-## Application design
+## Application design / Supervision structure
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 

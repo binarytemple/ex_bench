@@ -15,11 +15,12 @@ defmodule ExBench.MixProject do
   end
 
   def application() do
-
-    IO.puts(" config : #{inspect(Mix.Project.config(), width: :infinity)} ")
     case Keyword.get(Mix.Project.config(), :app) do
-      :ex_bench -> dependent_application()
-      _ -> application(Mix.env())
+      :ex_bench ->
+        application(Mix.env())
+
+      _ ->
+        dependent_application()
     end
   end
 
@@ -29,12 +30,12 @@ defmodule ExBench.MixProject do
 
   def application(:test) do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger]
     ]
   end
 
   def application(:dev) do
-    # :io_lib.format("~p", ["running in dev"])
+    :io_lib.format("~p", ["running in dev"])
 
     [
       extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
@@ -60,7 +61,7 @@ defmodule ExBench.MixProject do
       {:telemetry_metrics_prometheus, "~> 0.2", runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
-      {:telemetry, "~> 0.4"},
+      {:telemetry, "~> 0.4"}
     ]
   end
 

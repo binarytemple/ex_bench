@@ -60,49 +60,49 @@ defmodule ExBench.Application do
   end
 
   def start(start_type, env_type) do
-    :io.format("Logger not started",[])
+    :io.format("Logger not started", [])
     Logger.warn("#{__MODULE__} start(#{inspect([start_type, env_type])})")
     Logger.warn("#{__MODULE__} running as dependency == #{is_dependency()}")
 
     case is_dependency() do
       false ->
         start_as_app()
-      true -> start_as_dependency()
 
+      true ->
+        start_as_dependency()
     end
   end
 
-
   def start_as_app() do
     ExBench.Metrics.CommandInstrumenter.setup()
-        ExBench.Metrics.PlugExporter.setup()
-        Prometheus.Registry.register_collector(:prometheus_process_collector)
+    ExBench.Metrics.PlugExporter.setup()
+    Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-        children = [
-          Plug.Cowboy.child_spec(
-            scheme: :http,
-            plug: ExBench.Dev.Pipeline,
-            options: [port: 4000]
-          ),
-          :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-          {ExBench.Signaler, signaller_config()}
-        ]
+    children = [
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: ExBench.Dev.Pipeline,
+        options: [port: 4000]
+      ),
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
+      {ExBench.Signaler, signaller_config()}
+    ]
 
-        opts = [strategy: :one_for_one, name: ExBench.Supervisor]
-        Supervisor.start_link(children, opts)
+    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 
   def start_as_dependency() do
     ExBench.Metrics.CommandInstrumenter.setup()
-        ExBench.Metrics.PlugExporter.setup()
-        Prometheus.Registry.register_collector(:prometheus_process_collector)
+    ExBench.Metrics.PlugExporter.setup()
+    Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-        children = [
-          :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
-        ]
+    children = [
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
+    ]
 
-        opts = [strategy: :one_for_one, name: ExBench.Supervisor]
-        Supervisor.start_link(children, opts)
+    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 
   def stop() do

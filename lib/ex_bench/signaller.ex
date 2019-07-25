@@ -3,19 +3,28 @@ defmodule ExBench.Signaler do
   require Logger
   @timeout 60000
 
-  # def start_link(
-  #       %{
-  #         producer: _producer,
-  #         producer_argument: _producer_argument,
-  #         concurrency: _concurrency,
-  #         delay: _delay,
-  #         bench_fun: _bench_fun
-  #       } = args
-  #     ) do
-  #   GenServer.start_link(__MODULE__, args, name: __MODULE__)
-  # end
+  def start_link(
+        [],
+        %{
+          producer: _producer,
+          producer_argument: _producer_argument,
+          concurrency: _concurrency,
+          delay: _delay,
+          bench_fun: _bench_fun
+        } = args
+      ) do
+    start_link(args)
+  end
+
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  end
 
   # def start_link(args), do: Logger.error("Bad args: #{inspect(args)}"); :error
+
+  #  def  child_spec(init_arg) do
+  #   IO.puts("child spec called!!! #{inspect(init_arg)}")
+  #  end
 
   defp start_link_producer(producer, producer_argument) do
     {:ok, gs} = GenStage.start_link(producer, producer_argument)

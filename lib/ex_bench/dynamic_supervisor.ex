@@ -12,11 +12,22 @@ defmodule ExBench.DynamicSupervisor do
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
+  @doc """
+  And this is the contortion you have to go through to get DynamicSupervisor to spawn children at init.
+  """
   @impl true
-  def init(init_arg) do
-    DynamicSupervisor.init(
-      strategy: :one_for_one,
-      extra_arguments: [init_arg]
-    )
+  def init(args) when is_list(args) do
+    ret =
+      DynamicSupervisor.init(
+        strategy: :one_for_one,
+        extra_arguments: []
+      )
+
+    args
+    |> Enum.each(fn spec ->
+      spawn_link(fn -> ExBench.DynamicSupervisor.start_child(spec) end)
+    end)
+
+    ret
   end
 end

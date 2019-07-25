@@ -1,5 +1,3 @@
-
-
 defmodule ExBench.Application do
   @moduledoc false
 
@@ -19,7 +17,7 @@ defmodule ExBench.Application do
     ]
   end
 
-  def signaller_config() do
+  def dev_signaller_config() do
     conf = %{
       bench_fun: Application.get_env(:ex_bench, :bench_fun),
       producer: Application.get_env(:ex_bench, :producer),
@@ -58,9 +56,7 @@ defmodule ExBench.Application do
       producer_argument: %{filename: args[:filename]}
     }
 
-    # conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
-
-      ExBench.DynamicSupervisor.start_child( { ExBench.Signaler, [conf] })
+    ExBench.DynamicSupervisor.start_child({ExBench.Signaler, [conf]})
   end
 
   def start(_type, _args) do
@@ -83,21 +79,25 @@ defmodule ExBench.Application do
     ExBench.Metrics.PlugExporter.setup()
     Prometheus.Registry.register_collector(:prometheus_process_collector)
 
-    children_basic = [
+    children_base = [
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: ExBench.Dev.Pipeline,
         options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
       ),
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {ExBench.DynamicSupervisor , []},
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
     ]
 
     children =
       case env do
-        :prod -> children_basic
-        :dev -> children_basic
-        # :dev -> children_basic ++ [{ExBench.Signaler, signaller_config()}]
+        :prod ->
+          children_base ++ [{ExBench.DynamicSupervisor, []}]
+
+        :dev ->
+          children_base ++
+            [
+              {ExBench.DynamicSupervisor, [{ExBench.Signaler, dev_signaller_config()}]}
+            ]
       end
 
     opts = [strategy: :one_for_one, name: ExBench.Supervisor]
@@ -111,7 +111,7 @@ defmodule ExBench.Application do
 
     children = [
       :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {ExBench.DynamicSupervisor , []}
+      {ExBench.DynamicSupervisor, []}
     ]
 
     opts = [strategy: :one_for_one, name: ExBench.Supervisor]

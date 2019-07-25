@@ -18,6 +18,7 @@ defmodule ExBench.MixProject do
     case Keyword.get(Mix.Project.config(), :app) do
       :ex_bench ->
         application(Mix.env())
+
       _ ->
         dependent_application()
     end
@@ -29,6 +30,7 @@ defmodule ExBench.MixProject do
 
   def application(:test) do
     IO.puts("running in test")
+
     [
       extra_applications: [:logger]
     ]
@@ -36,6 +38,7 @@ defmodule ExBench.MixProject do
 
   def application(:dev) do
     IO.puts("running in dev")
+
     [
       extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
       mod: {ExBench.Application, [[], []]}
@@ -44,6 +47,7 @@ defmodule ExBench.MixProject do
 
   def application(:prod) do
     IO.puts("running in prod")
+
     [
       extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
       mod: {ExBench.Application, [[], []]}

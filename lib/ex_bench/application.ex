@@ -41,11 +41,12 @@ defmodule ExBench.Application do
 
   defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
-  @spec run(keyword) :: :ignore | {:error, any} | {:ok, pid}
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    [:telemetry, :gen_stage, :poolboy, :telemetry_metrics_prometheus]
+    [:telemetry, :gen_stage, :poolboy]
     |> Enum.each(&Application.ensure_all_started(&1))
+
+    # IO.puts("RUN ARGS #{inspect(args)}")
 
     conf = %{
       workers: 10,
@@ -53,16 +54,40 @@ defmodule ExBench.Application do
       concurrency: 3,
       bench_fun: args[:bench_fun],
       producer: ExBench.FileProducer,
-      producer_argument: %{filename: args[:filename]}
+      producer_argument: %{filename: args[:filename]},
+      delay: @delay
     }
+    # conf[:bench_fun].("HELLO WORLD")
+    ExBench.DynamicSupervisor.start_child(generate_poolboy_spec(conf[:bench_fun]))
+    ExBench.DynamicSupervisor.start_child({ExBench.Signaler, conf})
+  end
 
-    ExBench.DynamicSupervisor.start_child({ExBench.Signaler, [conf]})
+  def generate_poolboy_spec(
+        bench_fun,
+        config \\ [
+          name: {:local, :worker},
+          worker_module: ExBench.Worker,
+          size: 10,
+          max_overflow: 10
+        ]
+      ) do
+    spec = %{
+      id: :poolboy,
+      start:
+        {:poolboy, :start_link,
+         [
+           config,
+           bench_fun
+         ]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+    IO.inspect(spec)
   end
 
   def start(_type, _args) do
-    :io.format("Logger not started", [])
-    # Logger.error("#{__MODULE__} start(#{inspect([start_type, env_type])})")
-    # Logger.error("#{__MODULE__} running as dependency == #{is_dependency()}")
+    # IO.puts("Logger not yet started")
 
     case is_dependency() do
       false ->
@@ -78,14 +103,12 @@ defmodule ExBench.Application do
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
     Prometheus.Registry.register_collector(:prometheus_process_collector)
-
     children_base = [
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: ExBench.Dev.Pipeline,
         options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
-      ),
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
+      )
     ]
 
     children =
@@ -96,7 +119,11 @@ defmodule ExBench.Application do
         :dev ->
           children_base ++
             [
-              {ExBench.DynamicSupervisor, [{ExBench.Signaler, dev_signaller_config()}]}
+              {ExBench.DynamicSupervisor,
+               [
+                 generate_poolboy_spec(bench_fun_config(), poolboy_config()),
+                 {ExBench.Signaler, dev_signaller_config()}
+               ]}
             ]
       end
 
@@ -105,9 +132,6 @@ defmodule ExBench.Application do
   end
 
   def start_as_dependency() do
-    ExBench.Metrics.CommandInstrumenter.setup()
-    ExBench.Metrics.PlugExporter.setup()
-    Prometheus.Registry.register_collector(:prometheus_process_collector)
 
     children = [
       :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),

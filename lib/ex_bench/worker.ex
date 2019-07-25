@@ -5,7 +5,9 @@ defmodule ExBench.Worker do
     GenServer.start_link(__MODULE__, bench_fun, [])
   end
 
+  @spec init(any) :: {:ok, any}
   def init(bench_fun) do
+    # IO.puts("init : bench_fun: #{inspect(bench_fun)}")
     {:ok, bench_fun}
   end
 

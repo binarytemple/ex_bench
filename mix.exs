@@ -29,27 +29,21 @@ defmodule ExBench.MixProject do
   end
 
   def application(:test) do
-    IO.puts("running in test")
-
     [
       extra_applications: [:logger]
     ]
   end
 
   def application(:dev) do
-    IO.puts("running in dev")
-
     [
-      extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
+      extra_applications: [:prometheus, :cowboy, :logger,  :telemetry, :telemetry_metrics_prometheus],
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
   def application(:prod) do
-    IO.puts("running in prod")
-
     [
-      extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
+      extra_applications: [:prometheus, :cowboy, :logger, :telemetry, :telemetry_metrics_prometheus],
       mod: {ExBench.Application, [[], []]}
     ]
   end

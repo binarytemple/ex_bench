@@ -4,6 +4,7 @@ defmodule ExBench.Signaler do
   @timeout 60000
 
   def start_link(
+        [],
         %{
           producer: _producer,
           producer_argument: _producer_argument,
@@ -12,15 +13,21 @@ defmodule ExBench.Signaler do
           bench_fun: _bench_fun
         } = args
       ) do
-    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+    start_link(args)
   end
 
-  def start_link(args), do: Logger.error("Bad args: #{inspect(args)}")
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: __MODULE__)
+  end
 
   defp start_link_producer(producer, producer_argument) do
     {:ok, gs} = GenStage.start_link(producer, producer_argument)
     gs
   end
+
+  @impl true
+  def init([%{} = args]),
+    do: init(args)
 
   @impl true
   def init(
@@ -55,11 +62,11 @@ defmodule ExBench.Signaler do
 
     handles =
       params
-      |> Enum.map(fn i ->
+      |> Enum.map(fn work_fn ->
         Task.async(fn ->
           :poolboy.transaction(
             :worker,
-            fn pid -> GenServer.cast(pid, {:do_work, i}) end,
+            fn pid -> GenServer.cast(pid, {:do_work, work_fn}) end,
             @timeout
           )
         end)

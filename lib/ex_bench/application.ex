@@ -5,6 +5,9 @@ defmodule ExBench.Application do
   require Logger
   @delay 1000
 
+  def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
+  def mix_env(), do: Mix.env()
+
   def poolboy_config do
     [
       {:name, {:local, :worker}},
@@ -14,7 +17,7 @@ defmodule ExBench.Application do
     ]
   end
 
-  def signaller_config() do
+  def dev_signaller_config() do
     conf = %{
       bench_fun: Application.get_env(:ex_bench, :bench_fun),
       producer: Application.get_env(:ex_bench, :producer),
@@ -38,60 +41,105 @@ defmodule ExBench.Application do
 
   defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
-  @spec start_demo(keyword) :: :ignore | {:error, any} | {:ok, pid}
-  def start_demo(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
+  def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    Application.ensure_all_started(:telemetry)
+    # IO.puts("RUN ARGS #{inspect(args)}")
 
-    conf = [
+    conf = %{
       workers: 10,
       overflow: 2,
       concurrency: 3,
       bench_fun: args[:bench_fun],
       producer: ExBench.FileProducer,
-      producer_argument: %{filename: args[:filename]}
-    ]
+      producer_argument: %{filename: args[:filename]},
+      delay: @delay
+    }
 
-    conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
-    start(nil, Mix.env())
+    # conf[:bench_fun].("HELLO WORLD")
+    ExBench.DynamicSupervisor.start_child(generate_poolboy_spec(conf[:bench_fun]))
+    ExBench.DynamicSupervisor.start_child({ExBench.Signaler, conf})
   end
 
-  def start(start_type, env_type) do
-    Logger.debug("#{__MODULE__} start(#{inspect([start_type, env_type])})")
+  def generate_poolboy_spec(
+        bench_fun,
+        config \\ [
+          name: {:local, :worker},
+          worker_module: ExBench.Worker,
+          size: 10,
+          max_overflow: 10
+        ]
+      ) do
+    spec = %{
+      id: :poolboy,
+      start:
+        {:poolboy, :start_link,
+         [
+           config,
+           bench_fun
+         ]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
 
-    children = [
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
-      {ExBench.Signaler, signaller_config()}
+    IO.inspect(spec)
+  end
+
+  def start(_type, _args) do
+    # [:telemetry,:telemetry_metrics_prometheus, :gen_stage]
+    [:gen_stage]
+    |> Enum.each(&Application.ensure_all_started(&1))
+
+    case is_dependency() do
+      false ->
+        start_as_standalone_app(mix_env())
+
+      true ->
+        start_as_dependency()
+    end
+  end
+
+  def start_as_standalone_app(env) do
+    Logger.warn("starting as standalone app, env: #{env}")
+    ExBench.Metrics.CommandInstrumenter.setup()
+    ExBench.Metrics.PlugExporter.setup()
+    Prometheus.Registry.register_collector(:prometheus_process_collector)
+
+    children_base = [
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: ExBench.Dev.Pipeline,
+        options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
+      )
     ]
 
-    # ugly - has side effect..
     children =
-      case env_type do
+      case env do
+        :prod ->
+          children_base ++ [{ExBench.DynamicSupervisor, []}]
+
         :dev ->
-          ExBench.Metrics.CommandInstrumenter.setup()
-          ExBench.Dev.Metrics.PlugExporter.setup()
-          Prometheus.Registry.register_collector(:prometheus_process_collector)
-
-          cbs =
-            case start_type do
-              nil ->
-                []
-
-              _ ->
-                [
-                  Plug.Cowboy.child_spec(
-                    scheme: :http,
-                    plug: ExBench.Dev.Pipeline,
-                    options: [port: 4000]
-                  )
-                ]
-            end
-
-          children ++ cbs
-
-        _ ->
-          children
+          children_base ++
+            [
+              {ExBench.DynamicSupervisor,
+               [
+                 generate_poolboy_spec(bench_fun_config(), poolboy_config()),
+                 {ExBench.Signaler, dev_signaller_config()}
+               ]}
+            ]
       end
+
+    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
+  def start_as_dependency() do
+    ExBench.Metrics.CommandInstrumenter.setup()
+    ExBench.Metrics.PlugExporter.setup()
+
+    children = [
+      {ExBench.DynamicSupervisor, []}
+    ]
 
     opts = [strategy: :one_for_one, name: ExBench.Supervisor]
     Supervisor.start_link(children, opts)

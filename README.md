@@ -14,8 +14,11 @@ config :poc_event_timer,
   producer_argument: %{filename: "./test/consult.me"} # the argument applied to producer.init/1
 ```
 
+## Application design
 
-## Tricks 
+![Supervision hierarchy](./doc/exbench_supervision_tree.png)
+
+## Tricks
 
 ### Make a bigger input arguments file
 

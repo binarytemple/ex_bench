@@ -1,13 +1,12 @@
 defmodule ExBench.Application do
-
   use Application
   require Logger
   @delay 1000
 
-  def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
-  def mix_env(), do: Mix.env()
+  defp is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
+  defp mix_env(), do: Mix.env()
 
-  def poolboy_config do
+  defp poolboy_config do
     [
       {:name, {:local, :worker}},
       {:worker_module, ExBench.Worker},
@@ -16,7 +15,7 @@ defmodule ExBench.Application do
     ]
   end
 
-  def dev_signaller_config() do
+  defp dev_signaller_config() do
     conf = %{
       bench_fun: Application.get_env(:ex_bench, :bench_fun),
       producer: Application.get_env(:ex_bench, :producer),
@@ -34,12 +33,14 @@ defmodule ExBench.Application do
     conf
   end
 
-  def bench_fun_config() do
+  defp bench_fun_config() do
     Application.get_env(:ex_bench, :bench_fun)
   end
 
-  defp default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
+  def default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
+  @spec run(bench_fun: function(), filename: String.t()) ::
+          :ignore | {:error, any} | {:ok, pid} | {:ok, pid, any}
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
     # IO.puts("RUN ARGS #{inspect(args)}")
@@ -59,15 +60,15 @@ defmodule ExBench.Application do
     ExBench.DynamicSupervisor.start_child({ExBench.Signaler, conf})
   end
 
-  def generate_poolboy_spec(
-        bench_fun,
-        config \\ [
-          name: {:local, :worker},
-          worker_module: ExBench.Worker,
-          size: 10,
-          max_overflow: 10
-        ]
-      ) do
+  defp generate_poolboy_spec(
+         bench_fun,
+         config \\ [
+           name: {:local, :worker},
+           worker_module: ExBench.Worker,
+           size: 10,
+           max_overflow: 10
+         ]
+       ) do
     spec = %{
       id: :poolboy,
       start:
@@ -98,7 +99,7 @@ defmodule ExBench.Application do
     end
   end
 
-  def start_as_standalone_app(env) do
+  defp start_as_standalone_app(env) do
     Logger.warn("starting as standalone app, env: #{env}")
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
@@ -132,7 +133,7 @@ defmodule ExBench.Application do
     Supervisor.start_link(children, opts)
   end
 
-  def start_as_dependency() do
+  defp start_as_dependency() do
     ExBench.Metrics.CommandInstrumenter.setup()
     ExBench.Metrics.PlugExporter.setup()
 

@@ -35,25 +35,26 @@ defmodule ExBench.MixProject do
   end
 
   def application(:dev) do
-    :io_lib.format("~p", ["running in dev"])
+    IO.puts("running in dev")
 
     [
       extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
-      mod: {ExBench.Application, [Mix.env()]}
+      mod: {ExBench.Application, [[], []]}
     ]
   end
 
   def application(:prod) do
+    IO.puts("running in prod")
+
     [
       extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
-      mod: {ExBench.Application, [Mix.env()]}
+      mod: {ExBench.Application, [[], []]}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:prometheus_ex, "~> 3.0", only: :dev, runtime: false},
       {:prometheus_ex, "~> 3.0", runtime: false},
       {:prometheus_plugs, "~> 1.1.5", runtime: false},
       {:prometheus_process_collector, "~> 1.4", runtime: false},

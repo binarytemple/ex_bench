@@ -1,16 +1,4 @@
-defmodule ExBench.Supervisor do
-  # Automatically defines child_spec/1
-  use DynamicSupervisor
 
-  def start_link(init_arg) do
-    DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
-  end
-
-  @impl true
-  def init(_init_arg) do
-    DynamicSupervisor.init(strategy: :one_for_one)
-  end
-end
 
 defmodule ExBench.Application do
   @moduledoc false
@@ -72,13 +60,7 @@ defmodule ExBench.Application do
 
     # conf |> Enum.each(&Application.put_env(:ex_bench, elem(&1, 0), elem(&1, 1)))
 
-    DynamicSupervisor.start_child(
-      ExBench.DynamicSupervisor,
-      %{
-        id: ExBench.Signaler,
-        start: {ExBench.Signaler, :start_link, [conf]}
-      }
-    )
+      ExBench.DynamicSupervisor.start_child( { ExBench.Signaler, [conf] })
   end
 
   def start(_type, _args) do
@@ -107,16 +89,18 @@ defmodule ExBench.Application do
         plug: ExBench.Dev.Pipeline,
         options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
       ),
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
+      {ExBench.DynamicSupervisor , []},
     ]
 
     children =
       case env do
         :prod -> children_basic
-        :dev -> children_basic ++ [{ExBench.Signaler, signaller_config()}]
+        :dev -> children_basic
+        # :dev -> children_basic ++ [{ExBench.Signaler, signaller_config()}]
       end
 
-    opts = [strategy: :one_for_one, name: ExBench.DynamicSupervisor]
+    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
@@ -126,7 +110,8 @@ defmodule ExBench.Application do
     Prometheus.Registry.register_collector(:prometheus_process_collector)
 
     children = [
-      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config())
+      :poolboy.child_spec(:worker, poolboy_config(), bench_fun_config()),
+      {ExBench.DynamicSupervisor , []}
     ]
 
     opts = [strategy: :one_for_one, name: ExBench.Supervisor]

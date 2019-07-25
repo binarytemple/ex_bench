@@ -16,7 +16,7 @@ config :poc_event_timer,
 
 ## Application design
 
-![Supervision hierarchy](./doc_artefacts/exbench_supervision_tree.png)
+![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 
 ## Tricks
 

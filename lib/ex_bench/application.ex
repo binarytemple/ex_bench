@@ -5,7 +5,6 @@ defmodule ExBench.Application do
   require Logger
   @delay 1000
 
-
   def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
 
   def poolboy_config do
@@ -44,7 +43,8 @@ defmodule ExBench.Application do
   @spec run(keyword) :: :ignore | {:error, any} | {:ok, pid}
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    # Application.ensure_all_started(:telemetry)
+    [:telemetry, :gen_stage, :poolboy, :telemetry_metrics_prometheus]
+    |> Enum.each(&Application.ensure_all_started(&1))
 
     conf = [
       workers: 10,

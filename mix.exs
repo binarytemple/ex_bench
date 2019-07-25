@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.6",
+      version: "0.2.7",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -71,7 +71,7 @@ defmodule ExBench.MixProject do
   defp package() do
     [
       files:
-        ~w( lib/ex_bench/metrics lib/ex_bench/file_producer lib/ex_bench/worker.ex lib/ex_bench/signaller.ex lib/ex_bench/application.ex lib/ex_bench/file_producer.ex .formatter.exs mix.exs priv README.md LICENSE),
+      ~w( lib/ex_bench/metrics lib/ex_bench/file_producer lib/ex_bench/worker.ex lib/ex_bench/dynamic_supervisor.ex lib/ex_bench/signaller.ex lib/ex_bench/application.ex lib/ex_bench/file_producer.ex .formatter.exs mix.exs priv README.md LICENSE), 
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

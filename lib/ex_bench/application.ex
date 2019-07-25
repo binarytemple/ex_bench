@@ -60,12 +60,21 @@ defmodule ExBench.Application do
   end
 
   def start(start_type, env_type) do
-    Logger.debug("#{__MODULE__} start(#{inspect([start_type, env_type])})")
-    Logger.info("#{__MODULE__} running as dependency == #{is_dependency()}")
+    :io.format("Logger not started",[])
+    Logger.warn("#{__MODULE__} start(#{inspect([start_type, env_type])})")
+    Logger.warn("#{__MODULE__} running as dependency == #{is_dependency()}")
 
     case is_dependency() do
       false ->
-        ExBench.Metrics.CommandInstrumenter.setup()
+        start_as_app()
+      true -> start_as_dependency()
+
+    end
+  end
+
+
+  def start_as_app() do
+    ExBench.Metrics.CommandInstrumenter.setup()
         ExBench.Metrics.PlugExporter.setup()
         Prometheus.Registry.register_collector(:prometheus_process_collector)
 
@@ -81,10 +90,10 @@ defmodule ExBench.Application do
 
         opts = [strategy: :one_for_one, name: ExBench.Supervisor]
         Supervisor.start_link(children, opts)
+  end
 
-      # don't start cowboy for metrics endpoint
-      true ->
-        ExBench.Metrics.CommandInstrumenter.setup()
+  def start_as_dependency() do
+    ExBench.Metrics.CommandInstrumenter.setup()
         ExBench.Metrics.PlugExporter.setup()
         Prometheus.Registry.register_collector(:prometheus_process_collector)
 
@@ -94,7 +103,6 @@ defmodule ExBench.Application do
 
         opts = [strategy: :one_for_one, name: ExBench.Supervisor]
         Supervisor.start_link(children, opts)
-    end
   end
 
   def stop() do

@@ -8,50 +8,45 @@ defmodule ExBench.MixProject do
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
+      application: application(),
       description: description(),
       deps: deps()
     ]
   end
 
-  def is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
-
   def application() do
-    application(Mix.env(), is_dependency())
+
+    IO.puts(" config : #{inspect(Mix.Project.config(), width: :infinity)} ")
+    case Keyword.get(Mix.Project.config(), :app) do
+      :ex_bench -> dependent_application()
+      _ -> application(Mix.env())
+    end
   end
 
-  def application(:test, _) do
+  def dependent_application() do
+    []
+  end
+
+  def application(:test) do
     [
-      extra_applications: extra_applications()
+      extra_applications: [:logger],
     ]
   end
 
-  def application(:dev, false) do
+  def application(:dev) do
+    # :io_lib.format("~p", ["running in dev"])
+
     [
-      extra_applications: [:prometheus, :cowboy] ++ extra_applications(),
-      mod: {ExBench.Application, Mix.env()}
+      extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
+      mod: {ExBench.Application, [Mix.env()]}
     ]
   end
 
-  def application(:dev, true) do
+  def application(:prod) do
     [
-      extra_applications: extra_applications()
+      extra_applications: [:prometheus, :cowboy, :logger, :telemetry],
+      mod: {ExBench.Application, [Mix.env()]}
     ]
-  end
-
-  def application(:prod, false) do
-    [
-      extra_applications: [:prometheus, :cowboy] ++ extra_applications()
-    ]
-  end
-
-  def application(:prod, true) do
-    [
-      extra_applications: extra_applications()
-    ]
-  end
-
-  def extra_applications() do
-    [:logger, :telemetry]
   end
 
   # Run "mix help deps" to learn about dependencies.
@@ -62,9 +57,10 @@ defmodule ExBench.MixProject do
       {:prometheus_plugs, "~> 1.1.5", runtime: false},
       {:prometheus_process_collector, "~> 1.4", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:telemetry_metrics_prometheus, "~> 0.2", runtime: false},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"},
-      {:telemetry_metrics_prometheus, "~> 0.2"}
+      {:telemetry, "~> 0.4"},
     ]
   end
 

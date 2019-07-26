@@ -1,0 +1,16 @@
+defmodule ExBench.Capturer do
+  def capture(file, args \\ [trace_pattern: {:io, :format, 2}, count: 1]) do
+    {:ok, fh} = :file.open(file, [:append])
+
+    appender = fn {:trace, _pid, :call, {_m, _f, a}} ->
+      :file.write(fh, :io_lib.format("~p.~n", [a]))
+    end
+
+    :recon_trace.calls(args[:trace_pattern], args[:count], formatter: appender)
+
+    ### uh - how do I know when to close the file handle ? counting calls?
+    ### I know - lets never bother - and wait for ferd to reply...
+    ### I'm going to operate on the basis that nobody runs enough traces to exhaust
+    ### system file handle allocation
+  end
+end

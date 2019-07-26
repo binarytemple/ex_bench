@@ -53,18 +53,15 @@ defmodule ExBench.MixProject do
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:prometheus_ex, "~> 3.0", runtime: false},
-      {:prometheus_plugs, "~> 1.1.5", runtime: false},
-      {:prometheus_process_collector, "~> 1.4", runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:plug_cowboy, "~> 2.1"},
-      # {:telemetry_metrics_prometheus, "~> 0.2", runtime: false},
+      {:prometheus_ex, "~> 3.0", runtime: false, optional: true, override: true},
+      {:prometheus_plugs, "~> 1.1.5", runtime: false, optional: true},
+      {:prometheus_process_collector, "~> 1.4", runtime: false, optional: true},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, optional: true},
+      {:plug_cowboy, "~> 2.1", runtime: false, optional: true},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"}
-      # {:telemetry, "~> 0.4"}
     ]
   end
 

@@ -36,6 +36,28 @@ The startup behavior of this application depends on whether you embed it as a de
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 
+## Supported Elixir/OTP versions 
+
+See [travis build](https://travis-ci.org/bryanhuntesl/ex_bench) for definitive, up-to-date, test matrix.
+
+|Elixir|  OTP |
+|------|------|
+| 1.6  | 19   |
+| 1.6  | 20.3 |
+| 1.6  | 21   |
+| 1.7  | 19   |
+| 1.7  | 20.3 |
+| 1.7  | 21   |
+| 1.7  | 22   |
+| 1.8.1| 20.3 |
+| 1.8.1| 21   |
+| 1.8.1| 22   |
+| 1.9.0| 20.3 |
+| 1.9.0| 21   |
+| 1.9.0| 22   |
+|------|------|
+
+
 ## Tricks
 
 ### Make a bigger input arguments file

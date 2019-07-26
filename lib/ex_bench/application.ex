@@ -144,6 +144,10 @@ defmodule ExBench.Application do
   end
 
   def stop() do
+    stop(nil)
+  end
+
+  def stop(_state) do
     Logger.debug("#{__MODULE__} terminating")
     Supervisor.stop(ExBench.Supervisor)
   end

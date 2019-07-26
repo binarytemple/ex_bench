@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.9",
+      version: "0.2.10",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -59,6 +59,7 @@ defmodule ExBench.MixProject do
       {:prometheus_plugs, "~> 1.1.5", runtime: false, optional: true},
       {:prometheus_process_collector, "~> 1.4", runtime: false, optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, optional: true},
+      {:recon, "~> 2.5.0"},
       {:plug_cowboy, "~> 2.1", runtime: false, optional: true},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"}

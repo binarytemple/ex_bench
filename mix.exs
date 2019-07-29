@@ -15,13 +15,7 @@ defmodule ExBench.MixProject do
   end
 
   def application() do
-    case Keyword.get(Mix.Project.config(), :app) do
-      :ex_bench ->
-        application(Mix.env())
-
-      _ ->
-        dependent_application()
-    end
+    dependent_application()
   end
 
   def dependent_application() do

@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.12",
+      version: "0.2.13",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: false,
       package: package(),

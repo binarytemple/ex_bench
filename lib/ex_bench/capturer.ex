@@ -3,7 +3,7 @@ defmodule ExBench.Capturer do
     {:ok, fh} = :file.open(file, [:append])
 
     appender = fn {:trace, _pid, :call, {_m, _f, a}} ->
-      :file.write(fh, :io_lib.format("~p.~n", [a]))
+      :file.write(fh, :io_lib.format("~w.~n", [a]))
     end
 
     :recon_trace.calls(args[:trace_pattern], args[:count], formatter: appender)

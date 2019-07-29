@@ -21,6 +21,23 @@ config :ex_bench,
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 
+## Recording a trace ... 
+
+Capture a single invocation of 
+
+Erlang example :
+
+```
+'Elixir.ExBench.Capturer':capture("/tmp/foo.txt" , [ {trace_pattern, {io, format, 2}}, {count, 1}]).
+```
+
+Elixir example : 
+
+```
+ExBench.Capturer.capture("/tmp/foo.txt" , [ trace_pattern: {:io, :format, 2}, count: 1])
+```
+
+
 ## Supported Elixir/OTP versions 
 
 See [travis build](https://travis-ci.org/bryanhuntesl/ex_bench) for definitive, up-to-date, test matrix.

@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.2.10",
+      version: "0.2.13",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: false,
       package: package(),
@@ -44,7 +44,7 @@ defmodule ExBench.MixProject do
 
   defp deps do
     [
-      {:prometheus_ex, "~> 3.0", override: true},
+      {:prometheus_ex, "~> 3.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, optional: true},
       {:recon, "~> 2.5.0"},
       {:gen_stage, "~> 0.14"},

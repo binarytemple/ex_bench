@@ -7,6 +7,7 @@ An application for white box load testing
 ## Default configuration (dev running standalone)
 
 [config/dev.exs](config/dev.exs)
+
 ```elixir 
 config :ex_bench,
   workers: 10,
@@ -17,9 +18,48 @@ config :ex_bench,
   producer_argument: %{filename: "priv/example.consult"}
 ```
 
+## Invocation (when using as a dependency) 
+
+Typically you will leave the defaults as they currently are (workers, overflow, concurrency, producer).
+
+You will invoke ExBench.run - with no arguments - you can verify that the supervision system is working correctly, 
+the default test run will be executed.
+
+Or, and this is what you'll want to do 99.9% of the time, invoke ExBench.run - passing as arguments, the function to run 
+and the file to load arguments from. 
+
+For example (Elixir) : 
+
+```elixir
+ExBench.run(bench_fun: fn x -> IO.puts("I got the arguments #{inspect(x)} end, filename: "/tmp/args.txt")
+```
+
+Erlang : 
+
+```erlang
+'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/args.txt"}])
+```
+
 ## Application design / Supervision structure
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
+
+## Recording a trace ... 
+
+Capture a single invocation of 
+
+Erlang example :
+
+```
+'Elixir.ExBench.Capturer':capture("/tmp/foo.txt" , [ {trace_pattern, {io, format, 2}}, {count, 1}]).
+```
+
+Elixir example : 
+
+```
+ExBench.Capturer.capture("/tmp/foo.txt" , [ trace_pattern: {:io, :format, 2}, count: 1])
+```
+
 
 ## Supported Elixir/OTP versions 
 

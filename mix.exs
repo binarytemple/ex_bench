@@ -6,7 +6,7 @@ defmodule ExBench.MixProject do
       app: :ex_bench,
       version: "0.2.10",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
-      start_permanent: Mix.env() == :prod,
+      start_permanent: false,
       package: package(),
       application: application(),
       description: description(),
@@ -15,20 +15,7 @@ defmodule ExBench.MixProject do
   end
 
   def application() do
-    case Keyword.get(Mix.Project.config(), :app) do
-      :ex_bench ->
-        application(Mix.env())
-
-      _ ->
-        dependent_application()
-    end
-  end
-
-  def dependent_application() do
-    [
-      # extra_applications: [:logger,  :telemetry ],
-      extra_applications: [:logger]
-    ]
+    application(Mix.env())
   end
 
   def application(:test) do
@@ -39,28 +26,27 @@ defmodule ExBench.MixProject do
 
   def application(:dev) do
     [
-      # extra_applications: [:prometheus, :cowboy, :logger,  :telemetry, :telemetry_metrics_prometheus],
-      extra_applications: [:prometheus, :cowboy, :logger],
+      extra_applications: extra_applications(),
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
   def application(:prod) do
     [
-      # extra_applications: [:prometheus, :cowboy, :logger, :telemetry, :telemetry_metrics_prometheus],
-      extra_applications: [:prometheus, :cowboy, :logger],
+      extra_applications: extra_applications(),
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
+  def extra_applications() do
+    [:prometheus, :logger]
+  end
+
   defp deps do
     [
-      {:prometheus_ex, "~> 3.0", runtime: false, optional: true, override: true},
-      {:prometheus_plugs, "~> 1.1.5", runtime: false, optional: true},
-      {:prometheus_process_collector, "~> 1.4", runtime: false, optional: true},
+      {:prometheus_ex, "~> 3.0", override: true},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false, optional: true},
       {:recon, "~> 2.5.0"},
-      {:plug_cowboy, "~> 2.1", runtime: false, optional: true},
       {:gen_stage, "~> 0.14"},
       {:poolboy, "~> 1.5"}
     ]
@@ -68,8 +54,7 @@ defmodule ExBench.MixProject do
 
   defp package() do
     [
-      files:
-        ~w( lib/ex_bench/metrics lib/ex_bench/file_producer lib/ex_bench/capturer.ex lib/ex_bench/worker.ex lib/ex_bench/dynamic_supervisor.ex lib/ex_bench/signaller.ex lib/ex_bench/application.ex lib/ex_bench/file_producer.ex .formatter.exs mix.exs priv README.md LICENSE),
+      files: ~w( lib .formatter.exs mix.exs priv README.md LICENSE),
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

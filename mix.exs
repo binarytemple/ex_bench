@@ -26,23 +26,21 @@ defmodule ExBench.MixProject do
 
   def application(:dev) do
     [
-      extra_applications: extra_applications(), 
+      extra_applications: extra_applications(),
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
   def application(:prod) do
     [
-      extra_applications: extra_applications(), 
+      extra_applications: extra_applications(),
       mod: {ExBench.Application, [[], []]}
     ]
   end
 
-
-  def extra_applications() do 
+  def extra_applications() do
     [:prometheus, :logger]
   end
-
 
   defp deps do
     [
@@ -56,8 +54,7 @@ defmodule ExBench.MixProject do
 
   defp package() do
     [
-      files:
-        ~w( lib/ex_bench/metrics lib/ex_bench/file_producer lib/ex_bench/capturer.ex lib/ex_bench/worker.ex lib/ex_bench/dynamic_supervisor.ex lib/ex_bench/signaller.ex lib/ex_bench/application.ex lib/ex_bench/file_producer.ex .formatter.exs mix.exs priv README.md LICENSE),
+      files: ~w( lib .formatter.exs mix.exs priv README.md LICENSE),
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

@@ -17,21 +17,6 @@ config :ex_bench,
   producer_argument: %{filename: "priv/example.consult"}
 ```
 
-### Runtime dependencies
-
-* :ex_prometheus
-
-### Startup behavior
-
-The startup behavior of this application depends on whether you embed it as a dependency or run it as a standalone application, for example with `iex -S mix` or `MIX_ENV=prod iex -S mix` or `mix test`.
-
-| Startup type        | Environment | Behavior                                                                                                                                                                                                                |
-| ------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| As a dependency     | any         | starts :logger - doesn't run the default task until you execute ExBench.Application.run                                                                                                                                 |
-| Standalone          | :dev        | starts application, webserver, prometheus and prometheus export to :4000/metrics - starts running the default task                                                                                                      |
-| Standalone          | :prod       | starts application, webserver, prometheus and prometheus export to :4000/metrics - doesn't run the default task until you execute [ExBench.Application.run](https://hexdocs.pm/ex_bench/ExBench.Application.html#run/1) |
-| Standalone          | :test       | starts :logger, all scafolding is carried out in the tests/test helper
-
 ## Application design / Supervision structure
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)

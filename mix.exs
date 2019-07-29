@@ -21,7 +21,7 @@ defmodule ExBench.MixProject do
   def dependent_application() do
     [
       # extra_applications: [:logger,  :telemetry ],
-      extra_applications: [:logger]
+      extra_applications: [:logger, :gen_stage, :poolboy]
     ]
   end
 

@@ -3,8 +3,7 @@ defmodule ExBench.Application do
   require Logger
   @delay 1000
 
-  defp is_dependency(), do: Keyword.get(Mix.Project.config(), :app) != :ex_bench
-  defp mix_env(), do: Mix.env()
+  def default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
 
   defp poolboy_config do
     [
@@ -15,36 +14,10 @@ defmodule ExBench.Application do
     ]
   end
 
-  defp dev_signaller_config() do
-    conf = %{
-      bench_fun: Application.get_env(:ex_bench, :bench_fun),
-      producer: Application.get_env(:ex_bench, :producer),
-      producer_argument: Application.get_env(:ex_bench, :producer_argument),
-      concurrency: Application.get_env(:ex_bench, :concurrency),
-      delay: @delay
-    }
-
-    Map.to_list(conf)
-    |> Enum.each(fn
-      {k, nil} -> raise("#{inspect(:ex_bench)} #{inspect(k)} cannot be nil, check your config")
-      _ -> :ok
-    end)
-
-    conf
-  end
-
-  defp bench_fun_config() do
-    Application.get_env(:ex_bench, :bench_fun)
-  end
-
-  def default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
-
   @spec run(bench_fun: function(), filename: String.t()) ::
           :ignore | {:error, any} | {:ok, pid} | {:ok, pid, any}
   def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
       when is_list(args) do
-    # IO.puts("RUN ARGS #{inspect(args)}")
-
     conf = %{
       workers: 10,
       overflow: 2,
@@ -84,56 +57,10 @@ defmodule ExBench.Application do
   end
 
   def start(_type, _args) do
-    # [:telemetry,:telemetry_metrics_prometheus, :gen_stage]
-    [:gen_stage]
+    [:gen_stage, :prometheus_ex, :prometheus]
     |> Enum.each(&Application.ensure_all_started(&1))
 
-    case is_dependency() do
-      false ->
-        start_as_standalone_app(mix_env())
-
-      true ->
-        start_as_dependency()
-    end
-  end
-
-  defp start_as_standalone_app(env) do
-    Logger.warn("starting as standalone app, env: #{env}")
     ExBench.Metrics.CommandInstrumenter.setup()
-    ExBench.Metrics.PlugExporter.setup()
-    Prometheus.Registry.register_collector(:prometheus_process_collector)
-
-    children_base = [
-      Plug.Cowboy.child_spec(
-        scheme: :http,
-        plug: ExBench.Dev.Pipeline,
-        options: [port: 4000, transport_options: [num_acceptors: 5, max_connections: 5]]
-      )
-    ]
-
-    children =
-      case env do
-        :prod ->
-          children_base ++ [{ExBench.DynamicSupervisor, []}]
-
-        :dev ->
-          children_base ++
-            [
-              {ExBench.DynamicSupervisor,
-               [
-                 generate_poolboy_spec(bench_fun_config(), poolboy_config()),
-                 {ExBench.Signaler, dev_signaller_config()}
-               ]}
-            ]
-      end
-
-    opts = [strategy: :one_for_one, name: ExBench.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
-
-  defp start_as_dependency() do
-    ExBench.Metrics.CommandInstrumenter.setup()
-    ExBench.Metrics.PlugExporter.setup()
 
     children = [
       {ExBench.DynamicSupervisor, []}

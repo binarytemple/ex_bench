@@ -6,7 +6,7 @@ defmodule ExBench.MixProject do
       app: :ex_bench,
       version: "0.2.10",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
-      start_permanent: Mix.env() == :prod,
+      start_permanent: false,
       package: package(),
       application: application(),
       description: description(),

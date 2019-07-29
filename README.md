@@ -31,13 +31,13 @@ and the file to load arguments from.
 For example (Elixir) : 
 
 ```elixir
-ExBench.run(bench_fun: fn x -> IO.puts("I got the arguments #{inspect(x)} end, filename: "/tmp/args.txt")
+ExBench.run(bench_fun: fn x -> IO.puts("I got the arguments #{inspect(x)} end, filename: "/tmp/example.consult")
 ```
 
 Erlang : 
 
 ```erlang
-'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/args.txt"}])
+'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/example.consult"}]).
 ```
 
 ## Application design / Supervision structure

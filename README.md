@@ -2,13 +2,13 @@
 
 [![CI status](https://travis-ci.org/bryanhuntesl/ex_bench.svg?branch=master)](https://travis-ci.org/bryanhuntesl/ex_bench) / [Hexdocs](https://hexdocs.pm/ex_bench/)
 
-An application for white box load testing 
+An application for white box load testing
 
 ## Default configuration (dev running standalone)
 
 [config/dev.exs](config/dev.exs)
 
-```elixir 
+```elixir
 config :ex_bench,
   workers: 10,
   overflow: 2,
@@ -18,15 +18,14 @@ config :ex_bench,
   producer_argument: %{filename: "priv/example.consult"}
 ```
 
-## Invocation (when using as a dependency) 
+## Invocation (when using as a dependency)
 
 You will invoke ExBench.run - with no arguments - you can verify that the supervision system is working correctly, 
 the default test run will be executed. Stop the run with `ExBench.stop`.
 
-Or, to actually have it do something useful, initialize `%ExBench.Args{}` with custom arguments, and pass it to 
-ExBench.run . 
+Or, to actually have it do something useful, initialize `%ExBench.Args{}` with custom arguments, and pass it to `ExBench.run`.
 
-For example (Elixir) : 
+Example (Elixir) :
 
 ```elixir
 iex(12)> args = %ExBench.Args{bench_fun: fn(x) -> IO.puts("foo: #{inspect(x)}") end} 
@@ -60,19 +59,19 @@ Elixir :
 ExBench.stop()
 ```
 
-Erlang : 
+Erlang :
 
 ```erlang
 'Elixir.ExBench':stop()
-
+```
 
 ## Application design / Supervision structure
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 
-## Recording a trace ... 
+## Recording a trace ...
 
-Capture a single invocation of 
+Capture a single invocation of `:io.format("foo",[])`
 
 Erlang example :
 

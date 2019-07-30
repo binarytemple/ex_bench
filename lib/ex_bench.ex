@@ -1,32 +1,53 @@
-defmodule ExBench do
-  require Logger
+defmodule ExBench.Args do
   @delay 1000
-
-  def default_filename(), do: "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
-
-  defp poolboy_config do
-    [
-      {:name, {:local, :worker}},
-      {:worker_module, ExBench.Worker},
-      {:size, Application.get_env(:ex_bench, :workers)},
-      {:max_overflow, Application.get_env(:ex_bench, :overflow)}
-    ]
+  @default_filename "#{List.to_string(:code.priv_dir(:ex_bench))}/example.consult"
+  def example_fun(x) do
+    IO.inspect(x)
   end
 
-  @spec run(bench_fun: function(), filename: String.t()) ::
-          :ignore | {:error, any} | {:ok, pid} | {:ok, pid, any}
-  def run(args \\ [bench_fun: fn x -> IO.inspect(x) end, filename: default_filename()])
-      when is_list(args) do
-    conf = %{
-      workers: 10,
-      overflow: 2,
-      concurrency: 3,
-      bench_fun: args[:bench_fun],
-      producer: ExBench.FileProducer,
-      producer_argument: %{filename: args[:filename]},
-      delay: @delay
-    }
+  defstruct workers: 10,
+            overflow: 2,
+            concurrency: 3,
+            bench_fun: &ExBench.Args.example_fun/1,
+            producer: ExBench.FileProducer,
+            producer_argument: %{filename: @default_filename},
+            delay: @delay
 
+  def from_map(m) when is_map(m) do
+    struct(__MODULE__, m)
+  end
+end
+
+defmodule ExBench do
+  require Logger
+
+  def stop(), do: DynamicSupervisor.stop(ExBench.DynamicSupervisor)
+
+  # def run(
+  #       workers,
+  #       overflow,
+  #       concurrency,
+  #       bench_fun,
+  #       producer,
+  #       producer_argument,
+  #       delay
+  #     )
+  #     when is_map(producer_argument) do
+  #   args = %ExBench.Args{
+  #     workers: workers,
+  #     overflow: overflow,
+  #     concurrency: concurrency,
+  #     bench_fun: bench_fun,
+  #     producer: producer,
+  #     producer_argument: producer_argument,
+  #     delay: delay
+  #   }
+
+  #   run(args)
+  # end
+
+  def run(args \\ %ExBench.Args{}) do
+    conf = Map.from_struct(args)
     # conf[:bench_fun].("HELLO WORLD")
     ExBench.DynamicSupervisor.start_child(generate_poolboy_spec(conf[:bench_fun]))
     ExBench.DynamicSupervisor.start_child({ExBench.Signaler, conf})

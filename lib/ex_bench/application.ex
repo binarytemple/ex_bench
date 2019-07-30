@@ -1,7 +1,6 @@
 defmodule ExBench.Application do
   use Application
   require Logger
-  @delay 1000
 
   def start(_type, _args) do
     [:gen_stage, :prometheus_ex, :prometheus]

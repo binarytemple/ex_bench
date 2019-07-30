@@ -20,25 +20,51 @@ config :ex_bench,
 
 ## Invocation (when using as a dependency) 
 
-Typically you will leave the defaults as they currently are (workers, overflow, concurrency, producer).
-
 You will invoke ExBench.run - with no arguments - you can verify that the supervision system is working correctly, 
-the default test run will be executed.
+the default test run will be executed. Stop the run with `ExBench.stop`.
 
-Or, and this is what you'll want to do 99.9% of the time, invoke ExBench.run - passing as arguments, the function to run 
-and the file to load arguments from. 
+Or, to actually have it do something useful, initialize `%ExBench.Args{}` with custom arguments, and pass it to 
+ExBench.run . 
 
 For example (Elixir) : 
 
 ```elixir
-ExBench.run(bench_fun: fn x -> IO.puts("I got the arguments #{inspect(x)} end, filename: "/tmp/example.consult")
+iex(12)> args = %ExBench.Args{bench_fun: fn(x) -> IO.puts("foo: #{inspect(x)}") end} 
+%ExBench.Args{
+  bench_fun: #Function<6.99386804/1 in :erl_eval.expr/5>,
+  concurrency: 3,
+  delay: 1000,
+  overflow: 2,
+  producer: ExBench.FileProducer,
+  producer_argument: %{
+    filename: "/code/bryanhuntesl/ex_bench/_build/dev/lib/ex_bench/priv/example.consult"
+  },
+  workers: 10
+}
+
+ExBench.run(args)
+
+```
+
+Erlang :
+
+```erlang
+'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/example.consult"}]).
+```
+
+## Stopping an ExBench run
+
+Elixir :
+
+```elixir
+ExBench.stop()
 ```
 
 Erlang : 
 
 ```erlang
-'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/example.consult"}]).
-```
+'Elixir.ExBench':stop()
+
 
 ## Application design / Supervision structure
 
@@ -59,6 +85,20 @@ Elixir example :
 ```
 ExBench.Capturer.capture("/tmp/foo.txt" , [ trace_pattern: {:io, :format, 2}, count: 1])
 ```
+
+
+Erlang interface - Elixir example 
+
+```
+:ex_bench.run(10,10,5,fn(x) -> IO.inspect(x) end, ExBench.FileProducer, %{filename: "/tmp/example.consult"},1000)
+```
+
+Erlang interface - Erlang example 
+
+```
+ex_bench:run(10,10,5,fun(X) -> io:format("~w~n",[X]) end, 'Elixir.ExBench.FileProducer', %{filename => "/tmp/example.consult"},1000)
+```
+
 
 
 ## Supported Elixir/OTP versions 

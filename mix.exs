@@ -4,7 +4,7 @@ defmodule ExBench.MixProject do
   def project do
     [
       app: :ex_bench,
-      version: "0.3.0",
+      version: "0.3.1",
       elixir: "~> 1.6 or ~> 1.7 or ~> 1.8 or ~> 1.9",
       start_permanent: false,
       package: package(),
@@ -54,7 +54,7 @@ defmodule ExBench.MixProject do
 
   defp package() do
     [
-      files: ~w( lib .formatter.exs mix.exs priv README.md LICENSE),
+      files: ~w( lib src .formatter.exs mix.exs priv README.md LICENSE),
       homepage_url: "https://github.com/bryanhuntesl/ex_bench",
       licenses: ["Apache 2"],
       links: %{"GitHub" => "https://github.com/bryanhuntesl/ex_bench"},

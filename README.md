@@ -4,31 +4,33 @@
 
 An application for white box load testing
 
-## Default configuration (dev running standalone)
+## Recording a trace
 
-[config/dev.exs](config/dev.exs)
+Capture a single invocation of `:io.format("foo",[])`
+
+### Recording a trace Elixir example
 
 ```elixir
-config :ex_bench,
-  workers: 10,
-  overflow: 2,
-  concurrency: 3,
-  bench_fun: fn x -> IO.inspect(x) end,
-  producer: ExBench.FileProducer,
-  producer_argument: %{filename: "priv/example.consult"}
+ExBench.Capturer.capture("/tmp/foo.txt" , [ trace_pattern: {:io, :format, 2}, count: 1])
 ```
 
-## Invocation (when using as a dependency)
+### Recording a trace Erlang example
 
-You will invoke ExBench.run - with no arguments - you can verify that the supervision system is working correctly, 
+```erlang
+'Elixir.ExBench.Capturer':capture("/tmp/foo.txt" , [ {trace_pattern, {io, format, 2}}, {count, 1}]).
+```
+
+## Invocation (Elixir)
+
+You will invoke ExBench.run - with no arguments - you can verify that the supervision system is working correctly,
 the default test run will be executed. Stop the run with `ExBench.stop`.
 
 Or, to actually have it do something useful, initialize `%ExBench.Args{}` with custom arguments, and pass it to `ExBench.run`.
 
-Example (Elixir) :
+### Invocation example - Elixir
 
 ```elixir
-iex(12)> args = %ExBench.Args{bench_fun: fn(x) -> IO.puts("foo: #{inspect(x)}") end} 
+iex(12)> args = %ExBench.Args{bench_fun: fn(x) -> IO.puts("foo: #{inspect(x)}") end}
 %ExBench.Args{
   bench_fun: #Function<6.99386804/1 in :erl_eval.expr/5>,
   concurrency: 3,
@@ -42,24 +44,29 @@ iex(12)> args = %ExBench.Args{bench_fun: fn(x) -> IO.puts("foo: #{inspect(x)}") 
 }
 
 ExBench.run(args)
-
 ```
 
-Erlang :
+### Invocation example - Erlang API
+
+#### Erlang interface - Elixir example
+
+```elixir
+:ex_bench.run(10,10,5,fn(x) -> IO.inspect(x) end, ExBench.FileProducer, %{filename: "/tmp/example.consult"},1000)
+```
+
+#### Erlang interface - Erlang example
 
 ```erlang
-'Elixir.ExBench':run([ {  bench_fun, fun(X) -> io:format("I got the arguments ~w~n",[X]) end }, {filename, "/tmp/example.consult"}]).
+ex_bench:run(10,10,5,fun(X) -> io:format("~w~n",[X]) end, 'Elixir.ExBench.FileProducer', %{filename => "/tmp/example.consult"},1000)
 ```
 
-## Stopping an ExBench run
-
-Elixir :
+## Stopping an ExBench run (Elixir)
 
 ```elixir
 ExBench.stop()
 ```
 
-Erlang :
+## Stopping an ExBench run (Erlang)
 
 ```erlang
 'Elixir.ExBench':stop()
@@ -69,40 +76,11 @@ Erlang :
 
 ![Supervision hierarchy](./doc/exbench_supervision_tree.png)
 
-## Recording a trace ...
-
-Capture a single invocation of `:io.format("foo",[])`
-
-Erlang example :
-
-```
-'Elixir.ExBench.Capturer':capture("/tmp/foo.txt" , [ {trace_pattern, {io, format, 2}}, {count, 1}]).
-```
-
-Elixir example : 
-
-```
-ExBench.Capturer.capture("/tmp/foo.txt" , [ trace_pattern: {:io, :format, 2}, count: 1])
-```
-
-
-Erlang interface - Elixir example 
-
-```
-:ex_bench.run(10,10,5,fn(x) -> IO.inspect(x) end, ExBench.FileProducer, %{filename: "/tmp/example.consult"},1000)
-```
-
-Erlang interface - Erlang example 
-
-```
-ex_bench:run(10,10,5,fun(X) -> io:format("~w~n",[X]) end, 'Elixir.ExBench.FileProducer', %{filename => "/tmp/example.consult"},1000)
-```
-
-
-
-## Supported Elixir/OTP versions 
+## Supported Elixir/OTP versions
 
 See [travis build](https://travis-ci.org/bryanhuntesl/ex_bench) for definitive, up-to-date, test matrix.
+
+As of July 2019 - these are the tested versions:
 
 |Elixir|  OTP |
 |------|------|

@@ -57,7 +57,7 @@ ExBench.run(args)
 #### Erlang interface - Erlang example
 
 ```erlang
-ex_bench:run(10,10,5,fun(X) -> io:format("~w~n",[X]) end, 'Elixir.ExBench.FileProducer', %{filename => "/tmp/example.consult"},1000)
+ex_bench:run(10,10,5,fun(X) -> io:format("~w~n",[X]) end, 'Elixir.ExBench.FileProducer', #{filename => <<"/tmp/example.consult">>},1000)
 ```
 
 ## Stopping an ExBench run (Elixir)

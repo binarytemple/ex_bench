@@ -1,5 +1,10 @@
 defmodule ExBench.Capturer do
-  def capture(file, args \\ [trace_pattern: {:io, :format, 2}, count: 1]) do
+
+  def open_file(name), do {:ok, fh} = :file.open(file, [:append]), fh
+  
+  def close_file(fh), do :file.close(fh), fh
+  
+  def capture(fh, args \\ [trace_pattern: {:io, :format, 2}, count: 1]) do
     {:ok, fh} = :file.open(file, [:append])
 
     appender = fn {:trace, _pid, :call, {_m, _f, a}} ->
